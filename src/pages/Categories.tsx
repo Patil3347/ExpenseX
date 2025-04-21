@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { 
+  Category,
+  getCategories, 
+  addCategory, 
+  updateCategory, 
+  deleteCategory 
+} from "@/lib/expenses";
 
 const categoryFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
