@@ -17,6 +17,11 @@ import Dashboard from "@/pages/Dashboard";
 import Features from "@/pages/Features";
 import Articles from "@/pages/Articles";
 import About from "@/pages/About";
+import Profile from "@/pages/Profile";
+import Expenses from "@/pages/Expenses";
+import Categories from "@/pages/Categories";
+import Reports from "@/pages/Reports";
+import Settings from "@/pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +48,41 @@ const App = () => (
               <PrivateRoute>
                 <MainLayout>
                   <Dashboard />
+                </MainLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/expenses" element={
+              <PrivateRoute>
+                <MainLayout>
+                  <Expenses />
+                </MainLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/categories" element={
+              <PrivateRoute>
+                <MainLayout>
+                  <Categories />
+                </MainLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/reports" element={
+              <PrivateRoute>
+                <MainLayout>
+                  <Reports />
+                </MainLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/profile" element={
+              <PrivateRoute>
+                <MainLayout>
+                  <Profile />
+                </MainLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/settings" element={
+              <PrivateRoute>
+                <MainLayout>
+                  <Settings />
                 </MainLayout>
               </PrivateRoute>
             } />
