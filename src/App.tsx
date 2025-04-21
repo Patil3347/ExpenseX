@@ -10,15 +10,13 @@ import { AuthProvider, PrivateRoute } from "@/lib/auth";
 import { MainLayout } from "@/components/layout/MainLayout";
 
 // Pages
+import Index from "@/pages/Index";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import Dashboard from "@/pages/Dashboard";
-import Expenses from "@/pages/Expenses";
-import Categories from "@/pages/Categories";
-import Reports from "@/pages/Reports";
-import Profile from "@/pages/Profile";
-import Settings from "@/pages/Settings";
-import NotFound from "@/pages/NotFound";
+import Features from "@/pages/Features";
+import Articles from "@/pages/Articles";
+import About from "@/pages/About";
 
 const queryClient = new QueryClient();
 
@@ -30,11 +28,17 @@ const App = () => (
           <Toaster />
           <Sonner />
           <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/articles" element={<Articles />} />
+            <Route path="/about" element={<About />} />
+            
             {/* Auth Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             
-            {/* App Routes (Protected) */}
+            {/* Protected Routes */}
             <Route path="/dashboard" element={
               <PrivateRoute>
                 <MainLayout>
@@ -42,47 +46,9 @@ const App = () => (
                 </MainLayout>
               </PrivateRoute>
             } />
-            <Route path="/expenses" element={
-              <PrivateRoute>
-                <MainLayout>
-                  <Expenses />
-                </MainLayout>
-              </PrivateRoute>
-            } />
-            <Route path="/categories" element={
-              <PrivateRoute>
-                <MainLayout>
-                  <Categories />
-                </MainLayout>
-              </PrivateRoute>
-            } />
-            <Route path="/reports" element={
-              <PrivateRoute>
-                <MainLayout>
-                  <Reports />
-                </MainLayout>
-              </PrivateRoute>
-            } />
-            <Route path="/profile" element={
-              <PrivateRoute>
-                <MainLayout>
-                  <Profile />
-                </MainLayout>
-              </PrivateRoute>
-            } />
-            <Route path="/settings" element={
-              <PrivateRoute>
-                <MainLayout>
-                  <Settings />
-                </MainLayout>
-              </PrivateRoute>
-            } />
-            
-            {/* Redirect from root to login */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
             
             {/* Catch all */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </TooltipProvider>
       </AuthProvider>
