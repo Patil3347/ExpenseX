@@ -52,6 +52,25 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				expense: {
+					primary: '#6E59A5',
+					light: '#9b87f5',
+					dark: '#1A1F2C',
+					success: '#4CAF50',
+					warning: '#FFC107',
+					danger: '#FF5252',
+					info: '#2196F3',
+				},
+				category: {
+					food: '#FF6B6B',
+					transport: '#48BEFF',
+					housing: '#4E67EB',
+					entertainment: '#9C62FF',
+					shopping: '#FF8F6B',
+					utilities: '#4BD4A0',
+					health: '#FF6BB5',
+					other: '#8E9196',
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
