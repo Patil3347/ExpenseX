@@ -46,7 +46,7 @@ export const HomeArticles = () => {
   };
 
   return (
-    <section className="py-20 bg-[#1A1A1A]">
+    <section className="py-20 bg-[#1A1A1A]" id="articles">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
@@ -55,7 +55,7 @@ export const HomeArticles = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {initialArticles.map((article, index) => (
-            <div key={`initial-${index}`} className="bg-[#2D2D2D] rounded-lg overflow-hidden shadow-lg">
+            <div key={`initial-${index}`} className="bg-[#2D2D2D] rounded-lg overflow-hidden shadow-lg border border-[#3A3A3A] transition-transform duration-300 hover:-translate-y-2">
               <img
                 src={article.image}
                 alt={article.title}
@@ -73,7 +73,7 @@ export const HomeArticles = () => {
           ))}
 
           {showMore && extraArticles.map((article, index) => (
-            <div key={`extra-${index}`} className="bg-[#2D2D2D] rounded-lg overflow-hidden shadow-lg">
+            <div key={`extra-${index}`} className="bg-[#2D2D2D] rounded-lg overflow-hidden shadow-lg border border-[#3A3A3A] transition-transform duration-300 hover:-translate-y-2">
               <img
                 src={article.image}
                 alt={article.title}

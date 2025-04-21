@@ -23,6 +23,9 @@ import Categories from "@/pages/Categories";
 import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
 
+// Add global scroll behavior
+import './index.css';
+
 const queryClient = new QueryClient();
 
 const App = () => (

@@ -47,29 +47,24 @@ export function Sidebar() {
       href: "/profile",
       icon: User,
     },
-    {
-      name: "Settings",
-      href: "/settings",
-      icon: Settings,
-    },
   ];
 
   return (
     <div className={cn(
-      "h-screen bg-white border-r border-gray-200 flex flex-col justify-between transition-all duration-300",
+      "h-screen bg-[#2D2D2D] border-r border-[#3A3A3A] flex flex-col justify-between transition-all duration-300",
       collapsed ? "w-[70px]" : "w-[240px]"
     )}>
       <div className="flex flex-col">
         <div className={cn(
-          "flex items-center h-16 px-4 border-b border-gray-200",
+          "flex items-center h-16 px-4 border-b border-[#3A3A3A]",
           collapsed ? "justify-center" : "justify-between"
         )}>
-          {!collapsed && <div className="text-xl font-bold text-expense-primary">ExpenseX</div>}
+          {!collapsed && <div className="text-xl font-bold text-primary">ExpenseX</div>}
           <Button 
             variant="ghost" 
             size="icon"
             onClick={() => setCollapsed(!collapsed)}
-            className="h-8 w-8"
+            className="h-8 w-8 text-gray-300 hover:text-white hover:bg-[#3A3A3A]"
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
@@ -83,8 +78,8 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
                 pathname === item.href 
-                  ? "bg-expense-primary text-white" 
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-primary text-white" 
+                  : "text-gray-300 hover:bg-[#3A3A3A] hover:text-white"
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -98,7 +93,7 @@ export function Sidebar() {
         <Button
           variant="ghost" 
           className={cn(
-            "w-full justify-start px-3 py-2 text-gray-600 hover:bg-gray-100",
+            "w-full justify-start px-3 py-2 text-gray-300 hover:bg-[#3A3A3A] hover:text-white",
             collapsed ? "justify-center" : ""
           )}
           onClick={() => signOut()}

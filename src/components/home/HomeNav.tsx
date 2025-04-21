@@ -1,8 +1,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 interface HomeNavProps {
   onGetStarted: () => void;
@@ -10,6 +10,38 @@ interface HomeNavProps {
 
 export const HomeNav = ({ onGetStarted }: HomeNavProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // Helper function for smooth scrolling
+  const scrollToSection = (sectionId: string) => {
+    setIsMobileMenuOpen(false);
+    
+    // Check if we're on the homepage
+    if (location.pathname !== '/') {
+      // Navigate to homepage with section hash
+      window.location.href = `/#${sectionId}`;
+      return;
+    }
+    
+    // If on homepage, scroll to the section
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Check for hash in URL to scroll on page load
+  useEffect(() => {
+    if (location.hash) {
+      const sectionId = location.hash.substring(1);
+      setTimeout(() => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [location.hash]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#1A1A1A]/95 backdrop-blur-sm shadow-lg">
@@ -27,12 +59,18 @@ export const HomeNav = ({ onGetStarted }: HomeNavProps) => {
               <Link to="/" className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10">
                 Home
               </Link>
-              <Link to="/features" className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10">
+              <button 
+                onClick={() => scrollToSection('features')}
+                className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10"
+              >
                 Features
-              </Link>
-              <Link to="/articles" className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10">
+              </button>
+              <button 
+                onClick={() => scrollToSection('articles')}
+                className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10"
+              >
                 Articles
-              </Link>
+              </button>
               <Link to="/about" className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10">
                 About Us
               </Link>
@@ -69,12 +107,18 @@ export const HomeNav = ({ onGetStarted }: HomeNavProps) => {
             <Link to="/" className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300">
               Home
             </Link>
-            <Link to="/features" className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300">
+            <button 
+              onClick={() => scrollToSection('features')}
+              className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300 text-left"
+            >
               Features
-            </Link>
-            <Link to="/articles" className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300">
+            </button>
+            <button 
+              onClick={() => scrollToSection('articles')}
+              className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300 text-left"
+            >
               Articles
-            </Link>
+            </button>
             <Link to="/about" className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300">
               About Us
             </Link>

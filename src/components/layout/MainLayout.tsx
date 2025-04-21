@@ -9,7 +9,7 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-[#1A1A1A] text-white">
       <Sidebar />
       <main className="flex-1 overflow-auto p-6">
         {children || <Outlet />}

@@ -14,10 +14,10 @@ import {
   getExpenses,
   getCategoryTotals,
   getExpensesByPeriod,
-  formatCurrency,
   Expense,
   Category,
 } from "@/lib/expenses";
+import { formatIndianCurrency } from "@/lib/utils";
 import {
   BarChart,
   Bar,
@@ -191,12 +191,12 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Reports</h1>
+        <h1 className="text-3xl font-bold text-white">Reports</h1>
         <Select value={timeframe} onValueChange={(value: "week" | "month" | "year") => setTimeframe(value)}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px] bg-[#2D2D2D] border-[#3A3A3A] text-white">
             <SelectValue placeholder="Select timeframe" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A] text-white">
             <SelectItem value="week">Last Week</SelectItem>
             <SelectItem value="month">This Month</SelectItem>
             <SelectItem value="year">This Year</SelectItem>
@@ -205,15 +205,15 @@ export default function Reports() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-gray-300">
               Total Spending
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(total)}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-2xl font-bold text-white">{formatIndianCurrency(total)}</div>
+            <p className="text-xs text-gray-400 mt-1">
               {timeframe === "week"
                 ? "Last 7 days"
                 : timeframe === "month"
@@ -223,29 +223,29 @@ export default function Reports() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-gray-300">
               Categories
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{categoryData.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-2xl font-bold text-white">{categoryData.length}</div>
+            <p className="text-xs text-gray-400 mt-1">
               With activity in this period
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-gray-300">
               Avg. Daily Spend
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(
+            <div className="text-2xl font-bold text-white">
+              {formatIndianCurrency(
                 timeframe === "week"
                   ? total / 7
                   : timeframe === "month"
@@ -253,7 +253,7 @@ export default function Reports() {
                   : total / 365
               )}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-gray-400 mt-1">
               Per day during this period
             </p>
           </CardContent>
@@ -261,9 +261,9 @@ export default function Reports() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
           <CardHeader>
-            <CardTitle>Spending by Category</CardTitle>
+            <CardTitle className="text-white">Spending by Category</CardTitle>
           </CardHeader>
           <CardContent className="h-80">
             {categoryData.length > 0 ? (
@@ -283,21 +283,21 @@ export default function Reports() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                  <Tooltip formatter={(value) => formatIndianCurrency(value as number)} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex h-full items-center justify-center">
-                <p className="text-muted-foreground">No data available</p>
+                <p className="text-gray-400">No data available</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="text-white">
               Spending Over Time ({timeframe === "week" ? "Daily" : timeframe === "month" ? "Weekly" : "Monthly"})
             </CardTitle>
           </CardHeader>
@@ -305,25 +305,25 @@ export default function Reports() {
             {timeData.length > 0 && timeData.some(item => item.amount > 0) ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={timeData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#3A3A3A" />
+                  <XAxis dataKey="date" stroke="#E0E0E0" />
+                  <YAxis stroke="#E0E0E0" />
+                  <Tooltip formatter={(value) => formatIndianCurrency(value as number)} />
                   <Bar dataKey="amount" fill="#9b87f5" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex h-full items-center justify-center">
-                <p className="text-muted-foreground">No data available</p>
+                <p className="text-gray-400">No data available</p>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
         <CardHeader>
-          <CardTitle>Spending Breakdown</CardTitle>
+          <CardTitle className="text-white">Spending Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
           {categoryData.length > 0 ? (
@@ -336,11 +336,11 @@ export default function Reports() {
                         className="w-4 h-4 rounded-full mr-2"
                         style={{ backgroundColor: category.color }}
                       />
-                      <span>{category.name}</span>
+                      <span className="text-white">{category.name}</span>
                     </div>
-                    <span className="font-semibold">{formatCurrency(category.value)}</span>
+                    <span className="font-semibold text-white">{formatIndianCurrency(category.value)}</span>
                   </div>
-                  <div className="h-2 bg-gray-100 rounded-full">
+                  <div className="h-2 bg-[#3A3A3A] rounded-full">
                     <div
                       className="h-2 rounded-full"
                       style={{
@@ -349,14 +349,14 @@ export default function Reports() {
                       }}
                     />
                   </div>
-                  <div className="text-xs text-muted-foreground text-right">
+                  <div className="text-xs text-gray-400 text-right">
                     {((category.value / total) * 100).toFixed(1)}% of total
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-center py-8 text-muted-foreground">
+            <p className="text-center py-8 text-gray-400">
               No spending data available for this period
             </p>
           )}

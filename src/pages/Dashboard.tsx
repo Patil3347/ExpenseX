@@ -8,7 +8,6 @@ import {
   getExpensesByPeriod,
   getCategoryTotals,
   getCategories,
-  formatCurrency,
   Expense,
   Category
 } from "@/lib/expenses";
@@ -25,6 +24,7 @@ import {
   Legend,
 } from "recharts";
 import { format } from "date-fns";
+import { formatIndianCurrency } from "@/lib/utils";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -79,43 +79,43 @@ export default function Dashboard() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-gray-300">
               This Month
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(monthlyTotal)}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-2xl font-bold text-white">{formatIndianCurrency(monthlyTotal)}</div>
+            <p className="text-xs text-gray-400 mt-1">
               {format(new Date(), "MMMM yyyy")}
             </p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-gray-300">
               Categories
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{categoryData.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-2xl font-bold text-white">{categoryData.length}</div>
+            <p className="text-xs text-gray-400 mt-1">
               Active Categories
             </p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-gray-300">
               Expenses
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{recentExpenses.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-2xl font-bold text-white">{recentExpenses.length}</div>
+            <p className="text-xs text-gray-400 mt-1">
               This Month
             </p>
           </CardContent>
@@ -123,9 +123,9 @@ export default function Dashboard() {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="col-span-1">
+        <Card className="col-span-1 bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
           <CardHeader>
-            <CardTitle>Spending by Category</CardTitle>
+            <CardTitle className="text-white">Spending by Category</CardTitle>
           </CardHeader>
           <CardContent className="h-80">
             {categoryData.length > 0 ? (
@@ -145,44 +145,44 @@ export default function Dashboard() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                  <Tooltip formatter={(value) => formatIndianCurrency(value as number)} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex h-full items-center justify-center">
-                <p className="text-muted-foreground">No data available</p>
+                <p className="text-gray-400">No data available</p>
               </div>
             )}
           </CardContent>
         </Card>
         
-        <Card className="col-span-1">
+        <Card className="col-span-1 bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
           <CardHeader>
-            <CardTitle>Monthly Expenses</CardTitle>
+            <CardTitle className="text-white">Monthly Expenses</CardTitle>
           </CardHeader>
           <CardContent className="h-80">
             {expenseHistory.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={expenseHistory}>
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                  <XAxis dataKey="name" stroke="#E0E0E0" />
+                  <YAxis stroke="#E0E0E0" />
+                  <Tooltip formatter={(value) => formatIndianCurrency(value as number)} />
                   <Bar dataKey="amount" fill="#9b87f5" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex h-full items-center justify-center">
-                <p className="text-muted-foreground">No data available</p>
+                <p className="text-gray-400">No data available</p>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
       
-      <Card>
+      <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
         <CardHeader>
-          <CardTitle>Recent Expenses</CardTitle>
+          <CardTitle className="text-white">Recent Expenses</CardTitle>
         </CardHeader>
         <CardContent>
           {recentExpenses.length > 0 ? (
@@ -190,20 +190,20 @@ export default function Dashboard() {
               {recentExpenses.map((expense) => (
                 <div 
                   key={expense.id} 
-                  className="flex items-center justify-between border-b border-gray-100 pb-2"
+                  className="flex items-center justify-between border-b border-[#3A3A3A] pb-2"
                 >
                   <div>
-                    <p className="font-medium">{expense.description}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-medium text-white">{expense.description}</p>
+                    <p className="text-sm text-gray-400">
                       {format(new Date(expense.date), "MMM d, yyyy")}
                     </p>
                   </div>
-                  <div className="font-semibold">{formatCurrency(expense.amount)}</div>
+                  <div className="font-semibold text-white">{formatIndianCurrency(expense.amount)}</div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground text-center py-4">
+            <p className="text-gray-400 text-center py-4">
               No recent expenses
             </p>
           )}

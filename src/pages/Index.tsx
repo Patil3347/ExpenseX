@@ -22,7 +22,9 @@ const Index = () => {
     <div className="min-h-screen bg-[#1A1A1A]">
       <HomeNav onGetStarted={handleGetStarted} />
       <HomeHero onGetStarted={handleGetStarted} />
-      <HomeFeatures />
+      <div id="features">
+        <HomeFeatures />
+      </div>
       <HomeStats />
       <HomeArticles />
       <HomeCTA />
