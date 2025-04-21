@@ -1,15 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
-import {
-  getCategories,
-  addCategory,
-  updateCategory,
-  deleteCategory,
-  Category,
-} from "@/lib/expenses";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BackButton } from "@/components/ui/back-button";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +24,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
-// Form schema for category form
 const categoryFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   color: z.string().min(1, "Color is required").regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, {
@@ -45,7 +37,6 @@ export default function Categories() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Initialize form
   const form = useForm<z.infer<typeof categoryFormSchema>>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
@@ -54,14 +45,12 @@ export default function Categories() {
     },
   });
 
-  // Load categories
   useEffect(() => {
     if (user) {
       setCategories(getCategories(user.id));
     }
   }, [user]);
 
-  // Set form values when editing
   useEffect(() => {
     if (editingCategory) {
       form.reset({
@@ -76,7 +65,6 @@ export default function Categories() {
     }
   }, [editingCategory, form]);
 
-  // Handle form submission
   const onSubmit = (values: z.infer<typeof categoryFormSchema>) => {
     if (!user) return;
 
@@ -88,14 +76,12 @@ export default function Categories() {
       };
 
       if (editingCategory) {
-        // Update existing category
         updateCategory({
           ...categoryData,
           id: editingCategory.id,
           icon: editingCategory.icon,
         });
       } else {
-        // Add new category
         addCategory(categoryData);
       }
 
@@ -106,7 +92,6 @@ export default function Categories() {
     }
   };
 
-  // Handle category deletion
   const handleDelete = (categoryId: string) => {
     if (!user) return;
 
@@ -118,13 +103,11 @@ export default function Categories() {
     }
   };
 
-  // Open dialog for adding or editing
   const openDialog = (category?: Category) => {
     setEditingCategory(category || null);
     setIsDialogOpen(true);
   };
 
-  // Close dialog
   const closeDialog = () => {
     setEditingCategory(null);
     setIsDialogOpen(false);
@@ -132,16 +115,17 @@ export default function Categories() {
 
   return (
     <div className="space-y-6">
+      <BackButton />
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Categories</h1>
-        <Button onClick={() => openDialog()}>
+        <h1 className="text-3xl font-bold text-white">Categories</h1>
+        <Button onClick={() => openDialog()} className="bg-primary hover:bg-primary/90">
           <Plus className="mr-2 h-4 w-4" /> Add Category
         </Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map((category) => (
-          <Card key={category.id} className="overflow-hidden">
+          <Card key={category.id} className="overflow-hidden bg-[#2D2D2D] border-[#3A3A3A] transition-all duration-200 hover:border-primary/50">
             <CardHeader className="p-4 pb-2" style={{ backgroundColor: category.color, color: "#fff" }}>
               <CardTitle className="flex justify-between items-center">
                 <span>{category.name}</span>
@@ -165,7 +149,7 @@ export default function Categories() {
                 </div>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-4 pt-2">
+            <CardContent className="p-4 pt-2 bg-[#2D2D2D]">
               <div className="flex items-center justify-between">
                 <div className="h-4 w-4 rounded-full" style={{ backgroundColor: category.color }} />
                 <span className="text-sm text-muted-foreground">{category.color}</span>
@@ -177,7 +161,7 @@ export default function Categories() {
         {categories.length === 0 && (
           <div className="col-span-full text-center py-12">
             <p className="text-muted-foreground mb-4">No categories found</p>
-            <Button onClick={() => openDialog()}>
+            <Button onClick={() => openDialog()} className="bg-primary hover:bg-primary/90">
               <Plus className="mr-2 h-4 w-4" /> Add your first category
             </Button>
           </div>
@@ -185,7 +169,7 @@ export default function Categories() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A]">
           <DialogHeader>
             <DialogTitle>
               {editingCategory ? "Edit Category" : "Add Category"}
