@@ -11,7 +11,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -21,14 +20,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -36,6 +27,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Plus, Users, Trash2 } from "lucide-react";
 import { getUserGroups, createGroup, deleteGroup, Group } from "@/lib/groups";
+import { toast } from "@/components/ui/use-toast";
 
 // Form schema for group creation
 const groupFormSchema = z.object({
@@ -61,12 +53,27 @@ export default function Groups() {
   useEffect(() => {
     if (user) {
       loadGroups();
+    } else {
+      // Redirect to login if not authenticated
+      navigate("/login");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const loadGroups = () => {
     if (!user) return;
-    setGroups(getUserGroups(user.id));
+    
+    try {
+      const userGroups = getUserGroups(user.id);
+      console.log("Loaded groups:", userGroups);
+      setGroups(userGroups);
+    } catch (error) {
+      console.error("Error loading groups:", error);
+      toast({
+        variant: "destructive",
+        title: "Error loading groups",
+        description: "There was a problem loading your groups. Please try again.",
+      });
+    }
   };
 
   const onSubmit = (values: z.infer<typeof groupFormSchema>) => {
@@ -79,13 +86,29 @@ export default function Groups() {
       form.reset();
     } catch (error) {
       console.error("Error creating group:", error);
+      toast({
+        variant: "destructive",
+        title: "Error creating group",
+        description: "There was a problem creating your group. Please try again.",
+      });
     }
   };
 
-  const handleDeleteGroup = (groupId: string) => {
+  const handleDeleteGroup = (groupId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
     if (window.confirm("Are you sure you want to delete this group?")) {
-      deleteGroup(groupId);
-      loadGroups();
+      try {
+        deleteGroup(groupId);
+        loadGroups();
+      } catch (error) {
+        console.error("Error deleting group:", error);
+        toast({
+          variant: "destructive",
+          title: "Error deleting group",
+          description: "There was a problem deleting the group. Please try again.",
+        });
+      }
     }
   };
 
@@ -132,10 +155,7 @@ export default function Groups() {
                   variant="ghost" 
                   size="icon" 
                   className="h-8 w-8 text-gray-400 hover:text-red-400"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteGroup(group.id);
-                  }}
+                  onClick={(e) => handleDeleteGroup(group.id, e)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

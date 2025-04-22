@@ -44,9 +44,19 @@ export interface Balance {
   amount: number; // Positive means userId owes otherUserId
 }
 
+// Helper to initialize localStorage if needed
+function initializeLocalStorage(key: string, defaultValue: any): void {
+  if (localStorage.getItem(key) === null) {
+    localStorage.setItem(key, JSON.stringify(defaultValue));
+  }
+}
+
 // Get all groups for a user
 export function getUserGroups(userId: string): Group[] {
   try {
+    // Initialize groups storage if it doesn't exist
+    initializeLocalStorage('groups', []);
+    
     const groups = localStorage.getItem(`groups`);
     if (groups) {
       const parsedGroups = JSON.parse(groups) as Group[];
@@ -64,6 +74,9 @@ export function getUserGroups(userId: string): Group[] {
 // Get a specific group
 export function getGroup(groupId: string): Group | undefined {
   try {
+    // Initialize groups storage if it doesn't exist
+    initializeLocalStorage('groups', []);
+    
     const groups = localStorage.getItem(`groups`);
     if (groups) {
       const parsedGroups = JSON.parse(groups) as Group[];
@@ -79,6 +92,9 @@ export function getGroup(groupId: string): Group | undefined {
 // Create a new group
 export function createGroup(name: string, description: string, createdBy: User): Group {
   try {
+    // Initialize groups storage if it doesn't exist
+    initializeLocalStorage('groups', []);
+    
     const groups = localStorage.getItem(`groups`);
     const existingGroups = groups ? JSON.parse(groups) as Group[] : [];
     
@@ -122,6 +138,9 @@ export function createGroup(name: string, description: string, createdBy: User):
 // Add a member to a group
 export function addGroupMember(groupId: string, member: GroupMember): Group | undefined {
   try {
+    // Initialize groups storage if it doesn't exist
+    initializeLocalStorage('groups', []);
+    
     const groups = localStorage.getItem(`groups`);
     if (!groups) return undefined;
     
@@ -168,6 +187,9 @@ export function addGroupMember(groupId: string, member: GroupMember): Group | un
 // Remove a member from a group
 export function removeGroupMember(groupId: string, userId: string): Group | undefined {
   try {
+    // Initialize groups storage if it doesn't exist
+    initializeLocalStorage('groups', []);
+    
     const groups = localStorage.getItem(`groups`);
     if (!groups) return undefined;
     
@@ -219,6 +241,9 @@ export function removeGroupMember(groupId: string, userId: string): Group | unde
 // Delete a group
 export function deleteGroup(groupId: string): boolean {
   try {
+    // Initialize groups storage if it doesn't exist
+    initializeLocalStorage('groups', []);
+    
     const groups = localStorage.getItem(`groups`);
     if (!groups) return false;
     
@@ -228,6 +253,9 @@ export function deleteGroup(groupId: string): boolean {
     localStorage.setItem(`groups`, JSON.stringify(filteredGroups));
     
     // Also delete all expenses for this group
+    // Initialize shared-expenses storage if it doesn't exist
+    initializeLocalStorage('shared-expenses', []);
+    
     const expenses = localStorage.getItem(`shared-expenses`);
     if (expenses) {
       const parsedExpenses = JSON.parse(expenses) as SharedExpense[];
@@ -255,6 +283,9 @@ export function deleteGroup(groupId: string): boolean {
 // Add a shared expense to a group
 export function addSharedExpense(expense: Omit<SharedExpense, "id" | "createdAt" | "updatedAt" | "settled">): SharedExpense {
   try {
+    // Initialize shared-expenses storage if it doesn't exist
+    initializeLocalStorage('shared-expenses', []);
+    
     const expenses = localStorage.getItem(`shared-expenses`);
     const existingExpenses = expenses ? JSON.parse(expenses) as SharedExpense[] : [];
     
@@ -289,6 +320,9 @@ export function addSharedExpense(expense: Omit<SharedExpense, "id" | "createdAt"
 // Get all expenses for a group
 export function getGroupExpenses(groupId: string): SharedExpense[] {
   try {
+    // Initialize shared-expenses storage if it doesn't exist
+    initializeLocalStorage('shared-expenses', []);
+    
     const expenses = localStorage.getItem(`shared-expenses`);
     if (expenses) {
       const parsedExpenses = JSON.parse(expenses) as SharedExpense[];
@@ -367,6 +401,9 @@ export function calculateBalances(groupId: string): Balance[] {
 // Mark an expense as settled
 export function settleExpense(expenseId: string): SharedExpense | undefined {
   try {
+    // Initialize shared-expenses storage if it doesn't exist
+    initializeLocalStorage('shared-expenses', []);
+    
     const expenses = localStorage.getItem(`shared-expenses`);
     if (!expenses) return undefined;
     

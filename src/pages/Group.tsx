@@ -61,6 +61,7 @@ import {
   Check,
   ArrowLeft
 } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 import { 
   Group,
   GroupMember, 
@@ -124,31 +125,64 @@ export default function GroupDetails() {
   });
 
   useEffect(() => {
-    if (groupId) {
+    if (user && groupId) {
       loadGroupData();
+    } else if (!user) {
+      navigate("/login");
     }
-  }, [groupId]);
+  }, [user, groupId, navigate]);
 
   const loadGroupData = () => {
-    if (!groupId) return;
+    if (!groupId || !user) return;
     
     setIsLoading(true);
-    const groupData = getGroup(groupId);
-    
-    if (!groupData) {
+    try {
+      console.log("Loading group data for groupId:", groupId);
+      const groupData = getGroup(groupId);
+      console.log("Group data loaded:", groupData);
+      
+      if (!groupData) {
+        toast({
+          variant: "destructive",
+          title: "Group not found",
+          description: "The requested group could not be found.",
+        });
+        navigate("/groups");
+        return;
+      }
+      
+      // Check if user is member of this group
+      if (!groupData.members.some(m => m.userId === user.id)) {
+        toast({
+          variant: "destructive",
+          title: "Access denied",
+          description: "You are not a member of this group.",
+        });
+        navigate("/groups");
+        return;
+      }
+      
+      setGroup(groupData);
+      
+      const expensesData = getGroupExpenses(groupId);
+      console.log("Group expenses loaded:", expensesData);
+      setExpenses(expensesData);
+      
+      const balancesData = calculateBalances(groupId);
+      console.log("Group balances calculated:", balancesData);
+      setBalances(balancesData);
+    } catch (error) {
+      console.error("Error loading group data:", error);
+      toast({
+        variant: "destructive",
+        title: "Error loading group",
+        description: "There was a problem loading the group data.",
+      });
       navigate("/groups");
       return;
+    } finally {
+      setIsLoading(false);
     }
-    
-    setGroup(groupData);
-    
-    const expensesData = getGroupExpenses(groupId);
-    setExpenses(expensesData);
-    
-    const balancesData = calculateBalances(groupId);
-    setBalances(balancesData);
-    
-    setIsLoading(false);
   };
 
   const onAddExpense = (values: z.infer<typeof expenseFormSchema>) => {
@@ -183,6 +217,11 @@ export default function GroupDetails() {
       });
     } catch (error) {
       console.error("Error adding expense:", error);
+      toast({
+        variant: "destructive",
+        title: "Error adding expense",
+        description: "There was a problem adding the expense to your group.",
+      });
     }
   };
 
@@ -206,6 +245,11 @@ export default function GroupDetails() {
       memberForm.reset();
     } catch (error) {
       console.error("Error adding member:", error);
+      toast({
+        variant: "destructive",
+        title: "Error adding member",
+        description: "There was a problem adding the member to your group.",
+      });
     }
   };
 
@@ -213,15 +257,33 @@ export default function GroupDetails() {
     if (!groupId || userId === user?.id) return;
     
     if (window.confirm("Are you sure you want to remove this member?")) {
-      removeGroupMember(groupId, userId);
-      loadGroupData();
+      try {
+        removeGroupMember(groupId, userId);
+        loadGroupData();
+      } catch (error) {
+        console.error("Error removing member:", error);
+        toast({
+          variant: "destructive",
+          title: "Error removing member",
+          description: "There was a problem removing the member from your group.",
+        });
+      }
     }
   };
 
   const handleSettleExpense = (expenseId: string) => {
     if (window.confirm("Mark this expense as settled?")) {
-      settleExpense(expenseId);
-      loadGroupData();
+      try {
+        settleExpense(expenseId);
+        loadGroupData();
+      } catch (error) {
+        console.error("Error settling expense:", error);
+        toast({
+          variant: "destructive",
+          title: "Error settling expense",
+          description: "There was a problem marking the expense as settled.",
+        });
+      }
     }
   };
 

@@ -53,6 +53,11 @@ export function Sidebar() {
       href: "/profile",
       icon: User,
     },
+    {
+      name: "Settings",
+      href: "/settings",
+      icon: Settings,
+    },
   ];
 
   return (
