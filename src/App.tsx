@@ -22,6 +22,8 @@ import Expenses from "@/pages/Expenses";
 import Categories from "@/pages/Categories";
 import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
+import Groups from "@/pages/Groups";
+import Group from "@/pages/Group";
 
 // Add global scroll behavior
 import './index.css';
@@ -86,6 +88,21 @@ const App = () => (
               <PrivateRoute>
                 <MainLayout>
                   <Settings />
+                </MainLayout>
+              </PrivateRoute>
+            } />
+            {/* Add Groups routes */}
+            <Route path="/groups" element={
+              <PrivateRoute>
+                <MainLayout>
+                  <Groups />
+                </MainLayout>
+              </PrivateRoute>
+            } />
+            <Route path="/groups/:groupId" element={
+              <PrivateRoute>
+                <MainLayout>
+                  <Group />
                 </MainLayout>
               </PrivateRoute>
             } />

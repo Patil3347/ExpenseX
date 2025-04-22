@@ -8,8 +8,9 @@ import {
   FileText,
   PieChart,
   Tags,
-  Settings,
+  Users,
   User,
+  Settings,
   ChevronRight,
   ChevronLeft,
   LogOut
@@ -41,6 +42,11 @@ export function Sidebar() {
       name: "Reports",
       href: "/reports",
       icon: PieChart,
+    },
+    {
+      name: "Groups",
+      href: "/groups",
+      icon: Users,
     },
     {
       name: "Profile",
