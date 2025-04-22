@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -186,6 +187,7 @@ export default function GroupDetails() {
 
     try {
       const amount = parseFloat(values.amount);
+      // Calculate equal split amount for all members (including payer)
       const splitAmount = amount / group.members.length;
       
       const splits = group.members.map(member => ({
@@ -329,15 +331,15 @@ export default function GroupDetails() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <Card className="bg-[#2D2D2D] border-[#3A3A3A] col-span-1 shadow-lg">
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] col-span-1 shadow-lg transform transition-transform hover:scale-102">
           <CardHeader className="pb-3 border-b border-[#3A3A3A]">
             <CardTitle className="text-xl font-bold">Members</CardTitle>
           </CardHeader>
           <CardContent className="space-y-5 pt-4">
             {group.members.map(member => (
-              <div key={member.userId} className="flex justify-between items-center p-2 hover:bg-[#3A3A3A]/50 rounded-md transition-colors">
+              <div key={member.userId} className="flex justify-between items-center p-3 hover:bg-[#3A3A3A]/50 rounded-md transition-colors">
                 <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-lg font-bold">
+                  <div className="h-12 w-12 rounded-full bg-primary/30 flex items-center justify-center mr-3 text-xl font-bold shadow-lg">
                     {member.displayName.charAt(0).toUpperCase()}
                   </div>
                   <span className="text-lg font-medium">{member.displayName}</span>
@@ -366,7 +368,7 @@ export default function GroupDetails() {
           </CardFooter>
         </Card>
 
-        <Card className="bg-[#2D2D2D] border-[#3A3A3A] col-span-1 md:col-span-2 shadow-lg">
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] col-span-1 md:col-span-2 shadow-lg transform transition-transform hover:scale-102">
           <CardHeader className="pb-3 border-b border-[#3A3A3A]">
             <div className="flex justify-between items-center">
               <div>
@@ -378,7 +380,7 @@ export default function GroupDetails() {
               <Button 
                 onClick={() => setIsExpenseDialogOpen(true)} 
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-white font-bold"
+                className="bg-primary hover:bg-primary/90 text-white font-bold shadow-lg"
               >
                 <Plus className="mr-2 h-5 w-5" /> Add Expense
               </Button>
@@ -399,12 +401,12 @@ export default function GroupDetails() {
                         className="flex justify-between items-center p-4 border border-[#3A3A3A] rounded-md hover:bg-[#3A3A3A]/50 transition-colors shadow-md"
                       >
                         <div className="flex items-center">
-                          <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-lg font-bold">
+                          <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-lg font-bold shadow-lg">
                             {getMemberName(balance.userId).charAt(0).toUpperCase()}
                           </div>
                           <span className="font-bold text-lg">{getMemberName(balance.userId)}</span>
                           <span className="mx-3 text-gray-400 text-lg font-medium">owes</span>
-                          <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-lg font-bold">
+                          <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-lg font-bold shadow-lg">
                             {getMemberName(balance.otherUserId).charAt(0).toUpperCase()}
                           </div>
                           <span className="font-bold text-lg">{getMemberName(balance.otherUserId)}</span>
@@ -415,14 +417,14 @@ export default function GroupDetails() {
                   </div>
                 ) : (
                   <div className="text-center py-10 border border-dashed border-[#3A3A3A] rounded-md">
-                    <p className="text-gray-300 text-lg">No outstanding balances</p>
+                    <p className="text-gray-300 text-xl font-medium">No outstanding balances</p>
                     <p className="text-gray-400 mt-2">Everyone is settled up!</p>
                   </div>
                 )}
               </TabsContent>
               <TabsContent value="expenses">
                 <div className="space-y-6">
-                  <h3 className="text-lg font-bold text-gray-200">Active Expenses</h3>
+                  <h3 className="text-xl font-bold text-gray-200">Active Expenses</h3>
                   {activeExpenses.length > 0 ? (
                     <Table>
                       <TableHeader>
@@ -440,22 +442,22 @@ export default function GroupDetails() {
                             <TableCell className="font-medium text-base">{expense.description}</TableCell>
                             <TableCell>
                               <div className="flex items-center">
-                                <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-2 font-bold">
+                                <div className="h-10 w-10 rounded-full bg-primary/30 flex items-center justify-center mr-3 font-bold shadow-md">
                                   {getMemberName(expense.paidBy).charAt(0).toUpperCase()}
                                 </div>
-                                <span className="text-base">{getMemberName(expense.paidBy)}</span>
+                                <span className="text-base font-medium">{getMemberName(expense.paidBy)}</span>
                               </div>
                             </TableCell>
                             <TableCell className="text-base">{format(new Date(expense.date), "MMM dd, yyyy")}</TableCell>
-                            <TableCell className="text-right font-bold text-lg">{formatCurrency(expense.amount)}</TableCell>
+                            <TableCell className="text-right font-bold text-lg text-white">{formatCurrency(expense.amount)}</TableCell>
                             <TableCell>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleSettleExpense(expense.id)}
-                                className="h-9 w-9 text-gray-400 hover:bg-green-500/20 hover:text-green-500 transition-colors"
+                                className="h-10 w-10 text-gray-400 hover:bg-green-500/20 hover:text-green-500 transition-colors"
                               >
-                                <Check className="h-5 w-5" />
+                                <Check className="h-6 w-6" />
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -463,12 +465,12 @@ export default function GroupDetails() {
                       </TableBody>
                     </Table>
                   ) : (
-                    <p className="text-center py-6 text-gray-400 border border-dashed border-[#3A3A3A] rounded-md">No active expenses</p>
+                    <p className="text-center py-6 text-gray-400 border border-dashed border-[#3A3A3A] rounded-md text-lg">No active expenses</p>
                   )}
 
                   {settledExpenses.length > 0 && (
                     <>
-                      <h3 className="text-lg font-bold text-gray-200 mt-8">Settled Expenses</h3>
+                      <h3 className="text-xl font-bold text-gray-200 mt-8">Settled Expenses</h3>
                       <Table>
                         <TableHeader>
                           <TableRow className="border-[#3A3A3A] hover:bg-transparent">
@@ -484,14 +486,14 @@ export default function GroupDetails() {
                               <TableCell className="font-medium text-base">{expense.description}</TableCell>
                               <TableCell>
                                 <div className="flex items-center">
-                                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center mr-3 shadow-sm">
                                     {getMemberName(expense.paidBy).charAt(0).toUpperCase()}
                                   </div>
-                                  <span>{getMemberName(expense.paidBy)}</span>
+                                  <span className="text-base">{getMemberName(expense.paidBy)}</span>
                                 </div>
                               </TableCell>
                               <TableCell>{format(new Date(expense.date), "MMM dd, yyyy")}</TableCell>
-                              <TableCell className="text-right font-medium">{formatCurrency(expense.amount)}</TableCell>
+                              <TableCell className="text-right font-medium text-base">{formatCurrency(expense.amount)}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>

@@ -1,3 +1,4 @@
+
 import { toast } from "@/components/ui/use-toast";
 import { User } from "@/lib/auth";
 import { formatIndianCurrency } from "@/lib/utils";
@@ -366,10 +367,10 @@ export function calculateBalances(groupId: string): Balance[] {
   expenses.forEach(expense => {
     if (expense.settled) return;
     
-    // Add the full amount to the payer
+    // Add the full amount to the payer (they paid it all initially)
     netBalances[expense.paidBy] += expense.amount;
     
-    // Subtract each person's share
+    // Subtract each person's share (everyone owes their fair share)
     expense.splits.forEach(split => {
       netBalances[split.userId] -= split.amount;
     });
@@ -393,14 +394,14 @@ export function calculateBalances(groupId: string): Balance[] {
         balances.push({
           userId: user2,
           otherUserId: user1,
-          amount: balance,
+          amount: Math.abs(balance),
         });
       } else if (balance < 0) {
         // User1 owes User2
         balances.push({
           userId: user1,
           otherUserId: user2,
-          amount: -balance,
+          amount: Math.abs(balance),
         });
       }
       // If balance is 0, no debt exists

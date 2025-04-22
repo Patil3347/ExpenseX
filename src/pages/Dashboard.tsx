@@ -16,7 +16,8 @@ import {
 import {
   getGroupExpenses,
   getUserGroups,
-  SharedExpense
+  SharedExpense,
+  Group
 } from "@/lib/groups";
 import {
   PieChart,
@@ -30,7 +31,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { format, subWeeks, subMonths, subYears, startOfWeek, startOfMonth, startOfYear } from "date-fns";
+import { format, subDays, startOfWeek, startOfMonth, startOfYear, isWithinInterval } from "date-fns";
 import { CalendarRange, ChartBar, ChartPie } from "lucide-react";
 
 export default function Dashboard() {
@@ -43,6 +44,7 @@ export default function Dashboard() {
   const [timeFilter, setTimeFilter] = useState<"week" | "month" | "year">("month");
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [totalGroupExpenses, setTotalGroupExpenses] = useState(0);
+  const [userGroups, setUserGroups] = useState<Group[]>([]);
   
   const loadData = () => {
     if (!user) return;
@@ -67,17 +69,20 @@ export default function Dashboard() {
         periodType = "day";
     }
     
+    // Get user groups
+    const groups = getUserGroups(user.id);
+    setUserGroups(groups);
+    
     // Get personal expenses
     let personalExpenses = getExpensesByPeriod(user.id, periodType);
     const personalTotal = getCurrentMonthTotal(user.id);
     
     // Get group expenses and calculate user's share
-    const userGroups = getUserGroups(user.id);
     let groupExpensesTotal = 0;
     let allGroupExpenses: SharedExpense[] = [];
     let filteredGroupExpenses: SharedExpense[] = [];
     
-    userGroups.forEach(group => {
+    groups.forEach(group => {
       const groupExpenses = getGroupExpenses(group.id);
       allGroupExpenses = [...allGroupExpenses, ...groupExpenses];
       
@@ -118,9 +123,17 @@ export default function Dashboard() {
       .slice(0, 5)
     );
     
-    // Get category data for pie chart
-    const categoryTotals = getCategoryTotals(user.id, timeFilter);
+    // Get categories
     const categories = getCategories(user.id);
+    
+    // Create a map for group expense categorization
+    // Assigning group expenses to "Other" or similar category
+    const otherCategory = categories.find(cat => cat.name === "Other") || categories[0];
+    
+    // Get category data for pie chart (personal expenses)
+    const categoryTotals = getCategoryTotals(user.id, timeFilter);
+    
+    // Create chart data with combined personal and group expenses
     const categoryChartData = Object.entries(categoryTotals)
       .filter(([_, value]) => value > 0)
       .map(([categoryId, value]) => {
@@ -131,6 +144,16 @@ export default function Dashboard() {
           color: category.color,
         };
       });
+    
+    // Add group expenses to chart data (under "Group Expenses" category)
+    if (groupExpensesTotal > 0) {
+      categoryChartData.push({
+        name: "Group Expenses",
+        value: groupExpensesTotal,
+        color: "#9b87f5", // Use a distinctive color for group expenses
+      });
+    }
+    
     setCategoryData(categoryChartData);
     
     // Get expense history for bar chart
@@ -191,42 +214,58 @@ export default function Dashboard() {
       combinedHistory[date] += amount;
     });
     
-    // Format the combined history for chart
+    // Format the combined history for chart based on timeFilter
     let formattedHistory: { name: string, amount: number }[] = [];
     
     if (timeFilter === "week") {
-      // For week, show last 7 days
-      const last7Days = Object.entries(combinedHistory)
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .slice(-7)
-        .map(([date, total]) => ({
-          name: format(new Date(date), "EEE"),
-          amount: total,
-          fullDate: date
-        }));
+      // For week view, get last 7 days
+      const dates = Array.from({ length: 7 }).map((_, i) => {
+        const date = subDays(now, 6 - i);
+        const dateKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        return {
+          date: dateKey,
+          displayName: format(date, "EEE")
+        };
+      });
       
-      formattedHistory = last7Days;
+      formattedHistory = dates.map(({ date, displayName }) => ({
+        name: displayName,
+        amount: combinedHistory[date] || 0,
+        fullDate: date
+      }));
     } else if (timeFilter === "year") {
-      // For year, show months
-      const monthlyData = Object.entries(combinedHistory)
-        .map(([date, total]) => ({
-          name: format(new Date(`${date}-01`), "MMM"),
-          amount: total,
-          fullDate: date
-        }));
+      // For year view, show all months
+      const months = Array.from({ length: 12 }).map((_, i) => {
+        const date = new Date(now.getFullYear(), i, 1);
+        const dateKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        return {
+          date: dateKey,
+          displayName: format(date, "MMM")
+        };
+      });
       
-      formattedHistory = monthlyData;
+      formattedHistory = months.map(({ date, displayName }) => ({
+        name: displayName,
+        amount: combinedHistory[date] || 0,
+        fullDate: date
+      }));
     } else {
-      // For month, show days of the month
-      const dailyData = Object.entries(combinedHistory)
-        .map(([date, total]) => ({
-          name: format(new Date(date), "dd"),
-          amount: total,
-          fullDate: date
-        }))
-        .sort((a, b) => a.fullDate.localeCompare(b.fullDate));
+      // For month view, show days of the month
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const days = Array.from({ length: daysInMonth }).map((_, i) => {
+        const date = new Date(now.getFullYear(), now.getMonth(), i + 1);
+        const dateKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        return {
+          date: dateKey,
+          displayName: format(date, "dd")
+        };
+      });
       
-      formattedHistory = dailyData;
+      formattedHistory = days.map(({ date, displayName }) => ({
+        name: displayName,
+        amount: combinedHistory[date] || 0,
+        fullDate: date
+      }));
     }
     
     setExpenseHistory(formattedHistory);
@@ -269,7 +308,7 @@ export default function Dashboard() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg transform transition-transform hover:scale-105">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-300">
               {timeFilter === "week" ? "This Week" : timeFilter === "year" ? "This Year" : "This Month"}
@@ -297,7 +336,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
         
-        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg transform transition-transform hover:scale-105">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-300">
               Categories
@@ -308,10 +347,20 @@ export default function Dashboard() {
             <p className="text-xs text-gray-400 mt-1">
               Active Categories
             </p>
+            <div className="flex items-center justify-between mt-2 text-xs">
+              <div className="flex flex-col">
+                <span className="text-gray-400">Personal</span>
+                <span className="text-white font-semibold">{categoryData.filter(c => c.name !== "Group Expenses").length}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-gray-400">Groups</span>
+                <span className="text-white font-semibold">{userGroups.length}</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg transform transition-transform hover:scale-105">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-300">
               Expenses
@@ -324,6 +373,16 @@ export default function Dashboard() {
             <p className="text-xs text-gray-400 mt-1">
               {timeFilter === "week" ? "This Week" : timeFilter === "year" ? "This Year" : "This Month"}
             </p>
+            <div className="flex items-center justify-between mt-2 text-xs">
+              <div className="flex flex-col">
+                <span className="text-gray-400">Personal</span>
+                <span className="text-white font-semibold">{recentExpenses.length}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-gray-400">Group</span>
+                <span className="text-white font-semibold">{recentGroupExpenses.length}</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -331,7 +390,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="col-span-1 bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
           <CardHeader>
-            <CardTitle className="text-white flex items-center">
+            <CardTitle className="text-white flex items-center text-lg font-bold">
               <ChartPie className="h-5 w-5 mr-2" /> Spending by Category
             </CardTitle>
           </CardHeader>
@@ -344,7 +403,9 @@ export default function Dashboard() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={80}
+                    outerRadius={90}
+                    innerRadius={30}
+                    paddingAngle={5}
                     fill="#8884d8"
                     dataKey="value"
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
@@ -354,12 +415,32 @@ export default function Dashboard() {
                       <Cell 
                         key={`cell-${index}`} 
                         fill={entry.color} 
-                        style={{ filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.3))' }}
+                        style={{ 
+                          filter: 'drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5))',
+                          stroke: '#1A1A1A',
+                          strokeWidth: 1
+                        }}
                       />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                  <Legend />
+                  <Tooltip 
+                    formatter={(value) => formatCurrency(value as number)} 
+                    contentStyle={{ 
+                      backgroundColor: '#2D2D2D', 
+                      borderColor: '#3A3A3A',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)'
+                    }}
+                  />
+                  <Legend 
+                    formatter={(value) => <span className="text-sm font-medium">{value}</span>}
+                    layout="horizontal"
+                    verticalAlign="bottom" 
+                    align="center"
+                    wrapperStyle={{
+                      paddingTop: "20px"
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -372,7 +453,7 @@ export default function Dashboard() {
         
         <Card className="col-span-1 bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
           <CardHeader>
-            <CardTitle className="text-white flex items-center">
+            <CardTitle className="text-white flex items-center text-lg font-bold">
               <ChartBar className="h-5 w-5 mr-2" /> 
               {timeFilter === "week" ? "Daily" : timeFilter === "year" ? "Monthly" : "Daily"} Expenses
             </CardTitle>
@@ -395,8 +476,10 @@ export default function Dashboard() {
                   <Bar 
                     dataKey="amount" 
                     fill="#9b87f5" 
-                    radius={[4, 4, 0, 0]}
-                    style={{ filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.3))' }}
+                    radius={[8, 8, 0, 0]}
+                    style={{ 
+                      filter: 'drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5))'
+                    }}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -411,7 +494,7 @@ export default function Dashboard() {
       
       <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg">
         <CardHeader>
-          <CardTitle className="text-white text-xl">Recent Expenses</CardTitle>
+          <CardTitle className="text-white text-xl font-bold">Recent Expenses</CardTitle>
         </CardHeader>
         <CardContent>
           {recentExpenses.length > 0 || recentGroupExpenses.length > 0 ? (
@@ -420,7 +503,7 @@ export default function Dashboard() {
               {recentExpenses.map((expense) => (
                 <div 
                   key={expense.id} 
-                  className="flex items-center justify-between border-b border-[#3A3A3A] pb-3"
+                  className="flex items-center justify-between border-b border-[#3A3A3A] pb-3 hover:bg-[#3A3A3A]/20 p-2 rounded-md transition-colors"
                 >
                   <div>
                     <p className="font-medium text-white text-lg">{expense.description}</p>
@@ -438,7 +521,7 @@ export default function Dashboard() {
                 return (
                   <div 
                     key={expense.id} 
-                    className="flex items-center justify-between border-b border-[#3A3A3A] pb-3"
+                    className="flex items-center justify-between border-b border-[#3A3A3A] pb-3 hover:bg-[#3A3A3A]/20 p-2 rounded-md transition-colors"
                   >
                     <div>
                       <div className="flex items-center">
