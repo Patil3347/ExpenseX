@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +30,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { format, subDays, startOfWeek, startOfMonth, startOfYear, isWithinInterval } from "date-fns";
+import { format, subDays, startOfWeek, startOfMonth, startOfYear, isWithinInterval, endOfWeek, endOfMonth, endOfYear } from "date-fns";
 import { CalendarRange, ChartBar, ChartPie } from "lucide-react";
 
 export default function Dashboard() {
@@ -49,23 +48,27 @@ export default function Dashboard() {
   const loadData = () => {
     if (!user) return;
     
-    // Calculate start date based on time filter
+    // Calculate date ranges based on time filter
     const now = new Date();
     let startDate: Date;
+    let endDate: Date;
     let periodType: "day" | "month" | "year";
     
     switch (timeFilter) {
       case "week":
-        startDate = startOfWeek(now);
+        startDate = startOfWeek(now, { weekStartsOn: 1 });
+        endDate = endOfWeek(now, { weekStartsOn: 1 });
         periodType = "day";
         break;
       case "year":
         startDate = startOfYear(now);
+        endDate = endOfYear(now);
         periodType = "month";
         break;
       case "month":
       default:
         startDate = startOfMonth(now);
+        endDate = endOfMonth(now);
         periodType = "day";
     }
     
@@ -75,7 +78,14 @@ export default function Dashboard() {
     
     // Get personal expenses
     let personalExpenses = getExpensesByPeriod(user.id, periodType);
-    const personalTotal = getCurrentMonthTotal(user.id);
+    
+    // Filter personal expenses based on timeframe
+    const filteredPersonalExpenses = getCurrentMonthExpenses(user.id).filter(exp => {
+      const expDate = new Date(exp.date);
+      return isWithinInterval(expDate, { start: startDate, end: endDate });
+    });
+    
+    let personalTotal = filteredPersonalExpenses.reduce((total, expense) => total + expense.amount, 0);
     
     // Get group expenses and calculate user's share
     let groupExpensesTotal = 0;
@@ -89,7 +99,7 @@ export default function Dashboard() {
       // Filter group expenses based on timeframe
       const filteredExpenses = groupExpenses.filter(exp => {
         const expDate = new Date(exp.date);
-        return expDate >= startDate && expDate <= now;
+        return isWithinInterval(expDate, { start: startDate, end: endDate });
       });
       
       filteredGroupExpenses = [...filteredGroupExpenses, ...filteredExpenses];
@@ -116,19 +126,14 @@ export default function Dashboard() {
       .slice(0, 5);
     setRecentGroupExpenses(sortedGroupExpenses);
     
-    // Get recent personal expenses
-    const expenses = getCurrentMonthExpenses(user.id);
-    setRecentExpenses(expenses
+    // Sort and limit personal expenses to most recent 5
+    setRecentExpenses(filteredPersonalExpenses
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5)
     );
     
     // Get categories
     const categories = getCategories(user.id);
-    
-    // Create a map for group expense categorization
-    // Assigning group expenses to "Other" or similar category
-    const otherCategory = categories.find(cat => cat.name === "Other") || categories[0];
     
     // Get category data for pie chart (personal expenses)
     const categoryTotals = getCategoryTotals(user.id, timeFilter);
@@ -156,119 +161,104 @@ export default function Dashboard() {
     
     setCategoryData(categoryChartData);
     
-    // Get expense history for bar chart
-    let historyPeriod: string;
-    switch (timeFilter) {
-      case "week":
-        historyPeriod = "day";
-        break;
-      case "year":
-        historyPeriod = "month";
-        break;
-      case "month":
-      default:
-        historyPeriod = "day";
-    }
-    
-    // Get personal expense history
-    const expensesByPeriod = getExpensesByPeriod(user.id, historyPeriod)
-      .sort((a, b) => a.date.localeCompare(b.date));
-    
-    // Convert group expenses to the same format as personal expenses for chart
-    const groupExpensesByPeriod: Record<string, number> = {};
-    
-    filteredGroupExpenses.forEach(expense => {
-      const date = new Date(expense.date);
-      let periodKey: string;
-      
-      if (historyPeriod === "day") {
-        periodKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-      } else if (historyPeriod === "month") {
-        periodKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    // Prepare data for expense history chart
+    const generateTimeLabels = () => {
+      if (timeFilter === "week") {
+        // For week view, get last 7 days
+        return Array.from({ length: 7 }).map((_, i) => {
+          const date = subDays(endDate, 6 - i);
+          return {
+            date: date,
+            displayName: format(date, "EEE"),
+            dateKey: format(date, "yyyy-MM-dd")
+          };
+        });
+      } else if (timeFilter === "year") {
+        // For year view, show all months
+        return Array.from({ length: 12 }).map((_, i) => {
+          const date = new Date(now.getFullYear(), i, 1);
+          return {
+            date: date,
+            displayName: format(date, "MMM"),
+            dateKey: format(date, "yyyy-MM")
+          };
+        });
       } else {
-        periodKey = `${date.getFullYear()}`;
+        // For month view, show days of the month
+        const daysInMonth = endOfMonth(now).getDate();
+        return Array.from({ length: daysInMonth }).map((_, i) => {
+          const date = new Date(now.getFullYear(), now.getMonth(), i + 1);
+          return {
+            date: date,
+            displayName: format(date, "dd"),
+            dateKey: format(date, "yyyy-MM-dd")
+          };
+        });
       }
-      
-      const userShare = expense.splits.find(split => split.userId === user.id)?.amount || 0;
-      
-      if (!groupExpensesByPeriod[periodKey]) {
-        groupExpensesByPeriod[periodKey] = 0;
-      }
-      
-      groupExpensesByPeriod[periodKey] += userShare;
-    });
+    };
     
-    // Combine personal and group expenses for chart
-    const combinedHistory: Record<string, number> = {};
-    
-    // Add personal expenses
-    expensesByPeriod.forEach(item => {
-      combinedHistory[item.date] = item.total;
-    });
-    
-    // Add group expenses
-    Object.entries(groupExpensesByPeriod).forEach(([date, amount]) => {
-      if (!combinedHistory[date]) {
-        combinedHistory[date] = 0;
-      }
-      combinedHistory[date] += amount;
-    });
-    
-    // Format the combined history for chart based on timeFilter
-    let formattedHistory: { name: string, amount: number }[] = [];
-    
-    if (timeFilter === "week") {
-      // For week view, get last 7 days
-      const dates = Array.from({ length: 7 }).map((_, i) => {
-        const date = subDays(now, 6 - i);
-        const dateKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-        return {
-          date: dateKey,
-          displayName: format(date, "EEE")
-        };
+    // Get expense history by period
+    const getExpenseHistoryData = () => {
+      // Format personal expenses
+      const personalExpensesByDate: Record<string, number> = {};
+      filteredPersonalExpenses.forEach(expense => {
+        const expDate = new Date(expense.date);
+        let dateKey: string;
+        
+        if (timeFilter === "week" || timeFilter === "month") {
+          dateKey = format(expDate, "yyyy-MM-dd");
+        } else {
+          dateKey = format(expDate, "yyyy-MM");
+        }
+        
+        if (!personalExpensesByDate[dateKey]) {
+          personalExpensesByDate[dateKey] = 0;
+        }
+        personalExpensesByDate[dateKey] += expense.amount;
       });
       
-      formattedHistory = dates.map(({ date, displayName }) => ({
-        name: displayName,
-        amount: combinedHistory[date] || 0,
-        fullDate: date
-      }));
-    } else if (timeFilter === "year") {
-      // For year view, show all months
-      const months = Array.from({ length: 12 }).map((_, i) => {
-        const date = new Date(now.getFullYear(), i, 1);
-        const dateKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-        return {
-          date: dateKey,
-          displayName: format(date, "MMM")
-        };
+      // Format group expenses
+      const groupExpensesByDate: Record<string, number> = {};
+      filteredGroupExpenses.forEach(expense => {
+        const expDate = new Date(expense.date);
+        let dateKey: string;
+        
+        if (timeFilter === "week" || timeFilter === "month") {
+          dateKey = format(expDate, "yyyy-MM-dd");
+        } else {
+          dateKey = format(expDate, "yyyy-MM");
+        }
+        
+        const userShare = expense.splits.find(split => split.userId === user.id)?.amount || 0;
+        
+        if (!groupExpensesByDate[dateKey]) {
+          groupExpensesByDate[dateKey] = 0;
+        }
+        groupExpensesByDate[dateKey] += userShare;
       });
       
-      formattedHistory = months.map(({ date, displayName }) => ({
-        name: displayName,
-        amount: combinedHistory[date] || 0,
-        fullDate: date
-      }));
-    } else {
-      // For month view, show days of the month
-      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-      const days = Array.from({ length: daysInMonth }).map((_, i) => {
-        const date = new Date(now.getFullYear(), now.getMonth(), i + 1);
-        const dateKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-        return {
-          date: dateKey,
-          displayName: format(date, "dd")
-        };
+      // Combine personal and group expenses
+      const combinedExpenses: Record<string, number> = {};
+      
+      // Add personal expenses
+      Object.entries(personalExpensesByDate).forEach(([date, amount]) => {
+        combinedExpenses[date] = (combinedExpenses[date] || 0) + amount;
       });
       
-      formattedHistory = days.map(({ date, displayName }) => ({
+      // Add group expenses
+      Object.entries(groupExpensesByDate).forEach(([date, amount]) => {
+        combinedExpenses[date] = (combinedExpenses[date] || 0) + amount;
+      });
+      
+      // Generate formatted data for chart
+      const timeLabels = generateTimeLabels();
+      return timeLabels.map(({ displayName, dateKey }) => ({
         name: displayName,
-        amount: combinedHistory[date] || 0,
-        fullDate: date
+        amount: combinedExpenses[dateKey] || 0
       }));
-    }
+    };
     
-    setExpenseHistory(formattedHistory);
+    setExpenseHistory(getExpenseHistoryData());
   };
   
   useEffect(() => {
