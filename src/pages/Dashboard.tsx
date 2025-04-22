@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,7 +41,7 @@ export default function Dashboard() {
   const [recentGroupExpenses, setRecentGroupExpenses] = useState<SharedExpense[]>([]);
   const [categoryData, setCategoryData] = useState<{ name: string, value: number, color: string }[]>([]);
   const [expenseHistory, setExpenseHistory] = useState<{ name: string, amount: number }[]>([]);
-  const [timeFilter, setTimeFilter] = useState<"month" | "year">("month"); // Remove 'week'
+  const [timeFilter, setTimeFilter] = useState<"month" | "year">("month");
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [totalGroupExpenses, setTotalGroupExpenses] = useState(0);
   const [userGroups, setUserGroups] = useState<Group[]>([]);
@@ -53,7 +54,6 @@ export default function Dashboard() {
     let endDate: Date;
     let periodType: "day" | "month" | "year";
 
-    // Remove 'week' support entirely
     switch (timeFilter) {
       case "year":
         startDate = startOfYear(now);
@@ -143,7 +143,7 @@ export default function Dashboard() {
     
     setCategoryData(categoryChartData);
 
-    // Remove week, only month and year for time labeling
+    // Generate time labels for month and year only
     const generateTimeLabels = () => {
       if (timeFilter === "year") {
         return Array.from({ length: 12 }).map((_, i) => {
@@ -173,7 +173,7 @@ export default function Dashboard() {
         const expDate = new Date(expense.date);
         let dateKey: string;
         
-        if (timeFilter === "week" || timeFilter === "month") {
+        if (timeFilter === "month") {
           dateKey = format(expDate, "yyyy-MM-dd");
         } else {
           dateKey = format(expDate, "yyyy-MM");
@@ -190,7 +190,7 @@ export default function Dashboard() {
         const expDate = new Date(expense.date);
         let dateKey: string;
         
-        if (timeFilter === "week" || timeFilter === "month") {
+        if (timeFilter === "month") {
           dateKey = format(expDate, "yyyy-MM-dd");
         } else {
           dateKey = format(expDate, "yyyy-MM");
@@ -233,7 +233,6 @@ export default function Dashboard() {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <div className="flex items-center space-x-2">
-          {/* Remove "Last Week" button entirely */}
           <Button 
             variant={timeFilter === "month" ? "default" : "outline"} 
             size="sm"
@@ -254,7 +253,6 @@ export default function Dashboard() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Update period label display */}
         <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg transform transition-transform hover:scale-105">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-300">
@@ -320,7 +318,7 @@ export default function Dashboard() {
               {recentExpenses.length + recentGroupExpenses.length}
             </div>
             <p className="text-xs text-gray-400 mt-1">
-              {timeFilter === "week" ? "This Week" : timeFilter === "year" ? "This Year" : "This Month"}
+              {timeFilter === "month" ? "This Month" : "This Year"}
             </p>
             <div className="flex items-center justify-between mt-2 text-xs">
               <div className="flex flex-col">
