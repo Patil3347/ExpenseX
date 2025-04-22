@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -336,26 +335,47 @@ export default function GroupDetails() {
             <CardTitle className="text-xl font-bold">Members</CardTitle>
           </CardHeader>
           <CardContent className="space-y-5 pt-4">
-            {group.members.map(member => (
-              <div key={member.userId} className="flex justify-between items-center p-3 hover:bg-[#3A3A3A]/50 rounded-md transition-colors">
-                <div className="flex items-center">
-                  <div className="h-12 w-12 rounded-full bg-primary/30 flex items-center justify-center mr-3 text-xl font-bold shadow-lg">
-                    {member.displayName.charAt(0).toUpperCase()}
+            {group.members.map((member, idx) => {
+              const bgColors = [
+                "bg-gradient-to-br from-[#8B5CF6] to-[#1EAEDB]",
+                "bg-gradient-to-br from-[#D946EF] to-[#F97316]",
+                "bg-gradient-to-br from-[#6E59A5] to-[#4E67EB]",
+                "bg-gradient-to-br from-[#FFC107] to-[#4CAF50]",
+                "bg-gradient-to-br from-[#2196F3] to-[#6E59A5]",
+                "bg-gradient-to-br from-[#1EAEDB] to-[#FF6B6B]",
+                "bg-gradient-to-br from-[#8A2BE2] to-[#9b87f5]",
+              ];
+              const chosenBg = bgColors[idx % bgColors.length];
+              return (
+                <div key={member.userId} className="flex justify-between items-center p-3 hover:bg-[#3A3A3A]/50 rounded-md transition-colors">
+                  <div className="flex items-center">
+                    <div className={`h-12 w-12 rounded-full ${chosenBg} flex items-center justify-center mr-3 text-xl font-extrabold text-white shadow-lg`}>
+                      {member.displayName.charAt(0).toUpperCase()}
+                    </div>
+                    <span
+                      className="px-3 py-1 rounded-md font-bold text-lg"
+                      style={{
+                        color: "#FFFFFF",
+                        background: "linear-gradient(90deg, rgba(38,38,49,0.93),rgba(144,97,241,0.71))",
+                        boxShadow: "0 1px 8px 0 rgba(0,0,0,0.14)"
+                      }}
+                    >
+                      {member.displayName}
+                    </span>
                   </div>
-                  <span className="text-lg font-medium">{member.displayName}</span>
+                  {member.userId !== user?.id && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => handleRemoveMember(member.userId)}
+                      className="h-9 w-9 text-gray-400 hover:text-red-400 hover:bg-red-400/10"
+                    >
+                      <UserMinus className="h-5 w-5" />
+                    </Button>
+                  )}
                 </div>
-                {member.userId !== user?.id && (
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => handleRemoveMember(member.userId)}
-                    className="h-9 w-9 text-gray-400 hover:text-red-400 hover:bg-red-400/10"
-                  >
-                    <UserMinus className="h-5 w-5" />
-                  </Button>
-                )}
-              </div>
-            ))}
+              )
+            })}
           </CardContent>
           <CardFooter className="pt-3 border-t border-[#3A3A3A]">
             <Button 
@@ -395,25 +415,64 @@ export default function GroupDetails() {
               <TabsContent value="balances">
                 {balances.length > 0 ? (
                   <div className="space-y-4">
-                    {balances.map((balance, index) => (
+                    {balances.map((balance, index) => {
+                      const userIdx = group.members.findIndex(m => m.userId === balance.userId);
+                      const otherIdx = group.members.findIndex(m => m.userId === balance.otherUserId);
+                      const userBg = [
+                        "bg-gradient-to-br from-[#8B5CF6] to-[#1EAEDB]",
+                        "bg-gradient-to-br from-[#D946EF] to-[#F97316]",
+                        "bg-gradient-to-br from-[#6E59A5] to-[#4E67EB]",
+                        "bg-gradient-to-br from-[#FFC107] to-[#4CAF50]",
+                        "bg-gradient-to-br from-[#2196F3] to-[#6E59A5]",
+                        "bg-gradient-to-br from-[#1EAEDB] to-[#FF6B6B]",
+                        "bg-gradient-to-br from-[#8A2BE2] to-[#9b87f5]",
+                      ][userIdx % 7];
+                      const otherBg = [
+                        "bg-gradient-to-br from-[#8B5CF6] to-[#1EAEDB]",
+                        "bg-gradient-to-br from-[#D946EF] to-[#F97316]",
+                        "bg-gradient-to-br from-[#6E59A5] to-[#4E67EB]",
+                        "bg-gradient-to-br from-[#FFC107] to-[#4CAF50]",
+                        "bg-gradient-to-br from-[#2196F3] to-[#6E59A5]",
+                        "bg-gradient-to-br from-[#1EAEDB] to-[#FF6B6B]",
+                        "bg-gradient-to-br from-[#8A2BE2] to-[#9b87f5]",
+                      ][otherIdx % 7];
+                      return (
                       <div 
                         key={index} 
                         className="flex justify-between items-center p-4 border border-[#3A3A3A] rounded-md hover:bg-[#3A3A3A]/50 transition-colors shadow-md"
                       >
                         <div className="flex items-center">
-                          <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-lg font-bold shadow-lg">
+                          <div className={`h-12 w-12 rounded-full ${userBg} flex items-center justify-center mr-3 text-xl font-extrabold text-white shadow-lg`}>
                             {getMemberName(balance.userId).charAt(0).toUpperCase()}
                           </div>
-                          <span className="font-bold text-lg">{getMemberName(balance.userId)}</span>
-                          <span className="mx-3 text-gray-400 text-lg font-medium">owes</span>
-                          <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-lg font-bold shadow-lg">
+                          <span
+                            className="px-3 py-1 rounded-md font-bold text-lg"
+                            style={{
+                              color: "#FFFFFF",
+                              background: "linear-gradient(90deg, rgba(36,19,65,0.86),rgba(38,38,49,0.93),rgba(144,97,241,0.41))",
+                              boxShadow: "0 1px 8px 0 rgba(0,0,0,0.09)"
+                            }}
+                          >
+                            {getMemberName(balance.userId)}
+                          </span>
+                          <span className="mx-3 text-gray-200 text-lg font-semibold drop-shadow">owes</span>
+                          <div className={`h-12 w-12 rounded-full ${otherBg} flex items-center justify-center mr-3 text-xl font-extrabold text-white shadow-lg`}>
                             {getMemberName(balance.otherUserId).charAt(0).toUpperCase()}
                           </div>
-                          <span className="font-bold text-lg">{getMemberName(balance.otherUserId)}</span>
+                          <span
+                            className="px-3 py-1 rounded-md font-bold text-lg"
+                            style={{
+                              color: "#FFFFFF",
+                              background: "linear-gradient(90deg, rgba(38,38,49,0.93),rgba(144,97,241,0.71))",
+                              boxShadow: "0 1px 8px 0 rgba(0,0,0,0.14)"
+                            }}
+                          >
+                            {getMemberName(balance.otherUserId)}
+                          </span>
                         </div>
-                        <span className="font-bold text-xl text-green-400">{formatCurrency(balance.amount)}</span>
+                        <span className="font-extrabold text-xl text-green-400 drop-shadow-sm bg-black/10 px-5 py-2 rounded-lg border border-green-500/20">{formatCurrency(balance.amount)}</span>
                       </div>
-                    ))}
+                    )})}
                   </div>
                 ) : (
                   <div className="text-center py-10 border border-dashed border-[#3A3A3A] rounded-md">
@@ -437,15 +496,35 @@ export default function GroupDetails() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {activeExpenses.map(expense => (
+                        {activeExpenses.map(expense => {
+                          const payerIdx = group.members.findIndex(m => m.userId === expense.paidBy);
+                          const payerBg = [
+                            "bg-gradient-to-br from-[#8B5CF6] to-[#1EAEDB]",
+                            "bg-gradient-to-br from-[#D946EF] to-[#F97316]",
+                            "bg-gradient-to-br from-[#6E59A5] to-[#4E67EB]",
+                            "bg-gradient-to-br from-[#FFC107] to-[#4CAF50]",
+                            "bg-gradient-to-br from-[#2196F3] to-[#6E59A5]",
+                            "bg-gradient-to-br from-[#1EAEDB] to-[#FF6B6B]",
+                            "bg-gradient-to-br from-[#8A2BE2] to-[#9b87f5]",
+                          ][payerIdx % 7];
+                          return (
                           <TableRow key={expense.id} className="border-[#3A3A3A] hover:bg-[#3A3A3A]/50">
                             <TableCell className="font-medium text-base">{expense.description}</TableCell>
                             <TableCell>
                               <div className="flex items-center">
-                                <div className="h-10 w-10 rounded-full bg-primary/30 flex items-center justify-center mr-3 font-bold shadow-md">
+                                <div className={`h-10 w-10 rounded-full ${payerBg} flex items-center justify-center mr-3 font-bold shadow-md text-white text-lg`}>
                                   {getMemberName(expense.paidBy).charAt(0).toUpperCase()}
                                 </div>
-                                <span className="text-base font-medium">{getMemberName(expense.paidBy)}</span>
+                                <span
+                                  className="px-2 py-0.5 rounded-md font-semibold text-base"
+                                  style={{
+                                    color: "#FFFFFF",
+                                    background: "#563B99",
+                                    boxShadow: "0 1px 4px 0 rgba(44,20,92,0.10)"
+                                  }}
+                                >
+                                  {getMemberName(expense.paidBy)}
+                                </span>
                               </div>
                             </TableCell>
                             <TableCell className="text-base">{format(new Date(expense.date), "MMM dd, yyyy")}</TableCell>
@@ -461,7 +540,7 @@ export default function GroupDetails() {
                               </Button>
                             </TableCell>
                           </TableRow>
-                        ))}
+                        )})}
                       </TableBody>
                     </Table>
                   ) : (
@@ -481,21 +560,41 @@ export default function GroupDetails() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {settledExpenses.map(expense => (
+                          {settledExpenses.map(expense => {
+                            const payerIdx = group.members.findIndex(m => m.userId === expense.paidBy);
+                            const payerBg = [
+                              "bg-gradient-to-br from-[#8B5CF6] to-[#1EAEDB]",
+                              "bg-gradient-to-br from-[#D946EF] to-[#F97316]",
+                              "bg-gradient-to-br from-[#6E59A5] to-[#4E67EB]",
+                              "bg-gradient-to-br from-[#FFC107] to-[#4CAF50]",
+                              "bg-gradient-to-br from-[#2196F3] to-[#6E59A5]",
+                              "bg-gradient-to-br from-[#1EAEDB] to-[#FF6B6B]",
+                              "bg-gradient-to-br from-[#8A2BE2] to-[#9b87f5]",
+                            ][payerIdx % 7];
+                            return (
                             <TableRow key={expense.id} className="border-[#3A3A3A] opacity-60 hover:bg-[#3A3A3A]/30">
                               <TableCell className="font-medium text-base">{expense.description}</TableCell>
                               <TableCell>
                                 <div className="flex items-center">
-                                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center mr-3 shadow-sm">
+                                  <div className={`h-10 w-10 rounded-full ${payerBg} flex items-center justify-center mr-3 shadow-sm text-white text-lg font-bold`}>
                                     {getMemberName(expense.paidBy).charAt(0).toUpperCase()}
                                   </div>
-                                  <span className="text-base">{getMemberName(expense.paidBy)}</span>
+                                  <span
+                                    className="px-2 py-0.5 rounded-md font-semibold text-base"
+                                    style={{
+                                      color: "#FFFFFF",
+                                      background: "#563B99",
+                                      boxShadow: "0 1px 4px 0 rgba(44,20,92,0.07)"
+                                    }}
+                                  >
+                                    {getMemberName(expense.paidBy)}
+                                  </span>
                                 </div>
                               </TableCell>
                               <TableCell>{format(new Date(expense.date), "MMM dd, yyyy")}</TableCell>
                               <TableCell className="text-right font-medium text-base">{formatCurrency(expense.amount)}</TableCell>
                             </TableRow>
-                          ))}
+                          )})}
                         </TableBody>
                       </Table>
                     </>
