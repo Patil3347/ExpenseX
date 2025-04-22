@@ -280,7 +280,7 @@ export function deleteGroup(groupId: string): boolean {
   }
 }
 
-// Add a shared expense to a group
+// Add a shared expense to a group with proper equal distribution
 export function addSharedExpense(expense: Omit<SharedExpense, "id" | "createdAt" | "updatedAt" | "settled">): SharedExpense {
   try {
     // Initialize shared-expenses storage if it doesn't exist
@@ -289,8 +289,20 @@ export function addSharedExpense(expense: Omit<SharedExpense, "id" | "createdAt"
     const expenses = localStorage.getItem(`shared-expenses`);
     const existingExpenses = expenses ? JSON.parse(expenses) as SharedExpense[] : [];
     
+    // Calculate equal split amounts for all members (including payer)
+    const memberCount = expense.splits.length;
+    const equalAmount = expense.amount / memberCount;
+    
+    // Update splits with equal amounts
+    const updatedSplits = expense.splits.map(split => ({
+      ...split,
+      amount: equalAmount,
+      settled: false
+    }));
+    
     const newExpense: SharedExpense = {
       ...expense,
+      splits: updatedSplits,
       id: `exp-${Date.now()}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -335,7 +347,7 @@ export function getGroupExpenses(groupId: string): SharedExpense[] {
   }
 }
 
-// Calculate balances between group members
+// Calculate balances between group members with corrected logic
 export function calculateBalances(groupId: string): Balance[] {
   const expenses = getGroupExpenses(groupId);
   const group = getGroup(groupId);
@@ -381,14 +393,14 @@ export function calculateBalances(groupId: string): Balance[] {
         balances.push({
           userId: user2,
           otherUserId: user1,
-          amount: balance / 2, // Divide by 2 because we counted the full amount twice
+          amount: balance,
         });
       } else if (balance < 0) {
         // User1 owes User2
         balances.push({
           userId: user1,
           otherUserId: user2,
-          amount: -balance / 2, // Convert negative to positive, divide by 2
+          amount: -balance,
         });
       }
       // If balance is 0, no debt exists

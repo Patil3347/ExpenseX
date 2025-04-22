@@ -311,7 +311,7 @@ export default function GroupDetails() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center space-x-4">
         <Button 
           variant="ghost" 
@@ -325,131 +325,137 @@ export default function GroupDetails() {
       </div>
       
       {group.description && (
-        <p className="text-gray-400">{group.description}</p>
+        <p className="text-gray-300 text-lg">{group.description}</p>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-[#2D2D2D] border-[#3A3A3A] col-span-1">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Members</CardTitle>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] col-span-1 shadow-lg">
+          <CardHeader className="pb-3 border-b border-[#3A3A3A]">
+            <CardTitle className="text-xl font-bold">Members</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5 pt-4">
             {group.members.map(member => (
-              <div key={member.userId} className="flex justify-between items-center">
+              <div key={member.userId} className="flex justify-between items-center p-2 hover:bg-[#3A3A3A]/50 rounded-md transition-colors">
                 <div className="flex items-center">
-                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-3">
+                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-lg font-bold">
                     {member.displayName.charAt(0).toUpperCase()}
                   </div>
-                  <span>{member.displayName}</span>
+                  <span className="text-lg font-medium">{member.displayName}</span>
                 </div>
                 {member.userId !== user?.id && (
                   <Button 
                     variant="ghost" 
                     size="icon"
                     onClick={() => handleRemoveMember(member.userId)}
-                    className="h-8 w-8 text-gray-400 hover:text-red-400"
+                    className="h-9 w-9 text-gray-400 hover:text-red-400 hover:bg-red-400/10"
                   >
-                    <UserMinus className="h-4 w-4" />
+                    <UserMinus className="h-5 w-5" />
                   </Button>
                 )}
               </div>
             ))}
           </CardContent>
-          <CardFooter>
+          <CardFooter className="pt-3 border-t border-[#3A3A3A]">
             <Button 
               variant="outline" 
               onClick={() => setIsMemberDialogOpen(true)}
-              className="w-full border-[#3A3A3A] hover:bg-[#3A3A3A]"
+              className="w-full border-[#3A3A3A] hover:bg-[#3A3A3A] text-lg py-5"
             >
-              <UserPlus className="mr-2 h-4 w-4" /> Add Member
+              <UserPlus className="mr-2 h-5 w-5" /> Add Member
             </Button>
           </CardFooter>
         </Card>
 
-        <Card className="bg-[#2D2D2D] border-[#3A3A3A] col-span-1 md:col-span-2">
-          <CardHeader className="pb-3">
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A] col-span-1 md:col-span-2 shadow-lg">
+          <CardHeader className="pb-3 border-b border-[#3A3A3A]">
             <div className="flex justify-between items-center">
-              <CardTitle className="text-lg">Expenses Summary</CardTitle>
-              <Button onClick={() => setIsExpenseDialogOpen(true)} size="sm">
-                <Plus className="mr-2 h-4 w-4" /> Add Expense
+              <div>
+                <CardTitle className="text-xl font-bold">Expenses Summary</CardTitle>
+                <CardDescription className="text-gray-300 text-base mt-1">
+                  Total expenses: {formatCurrency(totalExpenses)}
+                </CardDescription>
+              </div>
+              <Button 
+                onClick={() => setIsExpenseDialogOpen(true)} 
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-white font-bold"
+              >
+                <Plus className="mr-2 h-5 w-5" /> Add Expense
               </Button>
             </div>
-            <CardDescription className="text-gray-400">
-              Total expenses: {formatCurrency(totalExpenses)}
-            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="balances">
-              <TabsList className="w-full bg-[#1A1A1A]">
-                <TabsTrigger value="balances" className="flex-1">Balances</TabsTrigger>
-                <TabsTrigger value="expenses" className="flex-1">Expenses</TabsTrigger>
+          <CardContent className="pt-4">
+            <Tabs defaultValue="balances" className="w-full">
+              <TabsList className="w-full bg-[#1A1A1A] mb-4">
+                <TabsTrigger value="balances" className="flex-1 text-lg py-3">Balances</TabsTrigger>
+                <TabsTrigger value="expenses" className="flex-1 text-lg py-3">Expenses</TabsTrigger>
               </TabsList>
-              <TabsContent value="balances" className="mt-4">
+              <TabsContent value="balances">
                 {balances.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {balances.map((balance, index) => (
                       <div 
                         key={index} 
-                        className="flex justify-between items-center p-3 border border-[#3A3A3A] rounded-md hover:bg-[#3A3A3A]/50 transition-colors"
+                        className="flex justify-between items-center p-4 border border-[#3A3A3A] rounded-md hover:bg-[#3A3A3A]/50 transition-colors shadow-md"
                       >
                         <div className="flex items-center">
-                          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                          <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-lg font-bold">
                             {getMemberName(balance.userId).charAt(0).toUpperCase()}
                           </div>
-                          <span className="font-medium">{getMemberName(balance.userId)}</span>
-                          <span className="mx-2 text-gray-400">owes</span>
-                          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                          <span className="font-bold text-lg">{getMemberName(balance.userId)}</span>
+                          <span className="mx-3 text-gray-400 text-lg font-medium">owes</span>
+                          <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-lg font-bold">
                             {getMemberName(balance.otherUserId).charAt(0).toUpperCase()}
                           </div>
-                          <span className="font-medium">{getMemberName(balance.otherUserId)}</span>
+                          <span className="font-bold text-lg">{getMemberName(balance.otherUserId)}</span>
                         </div>
-                        <span className="font-medium text-lg text-green-400">{formatCurrency(balance.amount)}</span>
+                        <span className="font-bold text-xl text-green-400">{formatCurrency(balance.amount)}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-6 border border-dashed border-[#3A3A3A] rounded-md">
-                    <p className="text-gray-400">No outstanding balances</p>
-                    <p className="text-xs text-gray-500 mt-1">Everyone is settled up!</p>
+                  <div className="text-center py-10 border border-dashed border-[#3A3A3A] rounded-md">
+                    <p className="text-gray-300 text-lg">No outstanding balances</p>
+                    <p className="text-gray-400 mt-2">Everyone is settled up!</p>
                   </div>
                 )}
               </TabsContent>
-              <TabsContent value="expenses" className="mt-4">
-                <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-gray-400">Active Expenses</h3>
+              <TabsContent value="expenses">
+                <div className="space-y-6">
+                  <h3 className="text-lg font-bold text-gray-200">Active Expenses</h3>
                   {activeExpenses.length > 0 ? (
                     <Table>
                       <TableHeader>
-                        <TableRow>
-                          <TableHead>Description</TableHead>
-                          <TableHead>Paid By</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead className="text-right">Amount</TableHead>
-                          <TableHead className="w-[80px]">Actions</TableHead>
+                        <TableRow className="border-[#3A3A3A] hover:bg-transparent">
+                          <TableHead className="text-gray-300 text-base">Description</TableHead>
+                          <TableHead className="text-gray-300 text-base">Paid By</TableHead>
+                          <TableHead className="text-gray-300 text-base">Date</TableHead>
+                          <TableHead className="text-gray-300 text-base text-right">Amount</TableHead>
+                          <TableHead className="text-gray-300 text-base w-[80px]">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {activeExpenses.map(expense => (
-                          <TableRow key={expense.id} className="hover:bg-[#3A3A3A]/50">
-                            <TableCell className="font-medium">{expense.description}</TableCell>
+                          <TableRow key={expense.id} className="border-[#3A3A3A] hover:bg-[#3A3A3A]/50">
+                            <TableCell className="font-medium text-base">{expense.description}</TableCell>
                             <TableCell>
                               <div className="flex items-center">
-                                <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                                <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-2 font-bold">
                                   {getMemberName(expense.paidBy).charAt(0).toUpperCase()}
                                 </div>
-                                <span>{getMemberName(expense.paidBy)}</span>
+                                <span className="text-base">{getMemberName(expense.paidBy)}</span>
                               </div>
                             </TableCell>
-                            <TableCell>{format(new Date(expense.date), "MMM dd, yyyy")}</TableCell>
-                            <TableCell className="text-right font-semibold">{formatCurrency(expense.amount)}</TableCell>
+                            <TableCell className="text-base">{format(new Date(expense.date), "MMM dd, yyyy")}</TableCell>
+                            <TableCell className="text-right font-bold text-lg">{formatCurrency(expense.amount)}</TableCell>
                             <TableCell>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleSettleExpense(expense.id)}
-                                className="h-8 w-8 text-gray-400 hover:bg-green-500/20 hover:text-green-500 transition-colors"
+                                className="h-9 w-9 text-gray-400 hover:bg-green-500/20 hover:text-green-500 transition-colors"
                               >
-                                <Check className="h-4 w-4" />
+                                <Check className="h-5 w-5" />
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -457,28 +463,35 @@ export default function GroupDetails() {
                       </TableBody>
                     </Table>
                   ) : (
-                    <p className="text-center py-3 text-gray-400">No active expenses</p>
+                    <p className="text-center py-6 text-gray-400 border border-dashed border-[#3A3A3A] rounded-md">No active expenses</p>
                   )}
 
                   {settledExpenses.length > 0 && (
                     <>
-                      <h3 className="text-sm font-medium text-gray-400 mt-6">Settled Expenses</h3>
+                      <h3 className="text-lg font-bold text-gray-200 mt-8">Settled Expenses</h3>
                       <Table>
                         <TableHeader>
-                          <TableRow>
-                            <TableHead>Description</TableHead>
-                            <TableHead>Paid By</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead className="text-right">Amount</TableHead>
+                          <TableRow className="border-[#3A3A3A] hover:bg-transparent">
+                            <TableHead className="text-gray-300 text-base">Description</TableHead>
+                            <TableHead className="text-gray-300 text-base">Paid By</TableHead>
+                            <TableHead className="text-gray-300 text-base">Date</TableHead>
+                            <TableHead className="text-gray-300 text-base text-right">Amount</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {settledExpenses.map(expense => (
-                            <TableRow key={expense.id} className="opacity-60">
-                              <TableCell className="font-medium">{expense.description}</TableCell>
-                              <TableCell>{getMemberName(expense.paidBy)}</TableCell>
+                            <TableRow key={expense.id} className="border-[#3A3A3A] opacity-60 hover:bg-[#3A3A3A]/30">
+                              <TableCell className="font-medium text-base">{expense.description}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center">
+                                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                                    {getMemberName(expense.paidBy).charAt(0).toUpperCase()}
+                                  </div>
+                                  <span>{getMemberName(expense.paidBy)}</span>
+                                </div>
+                              </TableCell>
                               <TableCell>{format(new Date(expense.date), "MMM dd, yyyy")}</TableCell>
-                              <TableCell className="text-right">{formatCurrency(expense.amount)}</TableCell>
+                              <TableCell className="text-right font-medium">{formatCurrency(expense.amount)}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
