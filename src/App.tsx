@@ -21,7 +21,6 @@ import Profile from "@/pages/Profile";
 import Expenses from "@/pages/Expenses";
 import Categories from "@/pages/Categories";
 import Reports from "@/pages/Reports";
-import Settings from "@/pages/Settings";
 import Groups from "@/pages/Groups";
 import Group from "@/pages/Group";
 
@@ -84,14 +83,7 @@ const App = () => (
                 </MainLayout>
               </PrivateRoute>
             } />
-            {/* Removed Settings Route */}
-            {/* <Route path="/settings" element={
-              <PrivateRoute>
-                <MainLayout>
-                  <Settings />
-                </MainLayout>
-              </PrivateRoute>
-            } /> */}
+            
             {/* Add Groups routes */}
             <Route path="/groups" element={
               <PrivateRoute>
