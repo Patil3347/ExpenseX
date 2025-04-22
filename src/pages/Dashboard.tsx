@@ -40,7 +40,7 @@ export default function Dashboard() {
   const [recentGroupExpenses, setRecentGroupExpenses] = useState<SharedExpense[]>([]);
   const [categoryData, setCategoryData] = useState<{ name: string, value: number, color: string }[]>([]);
   const [expenseHistory, setExpenseHistory] = useState<{ name: string, amount: number }[]>([]);
-  const [timeFilter, setTimeFilter] = useState<"week" | "month" | "year">("month");
+  const [timeFilter, setTimeFilter] = useState<"month" | "year">("month"); // Remove 'week'
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [totalGroupExpenses, setTotalGroupExpenses] = useState(0);
   const [userGroups, setUserGroups] = useState<Group[]>([]);
@@ -52,13 +52,9 @@ export default function Dashboard() {
     let startDate: Date;
     let endDate: Date;
     let periodType: "day" | "month" | "year";
-    
+
+    // Remove 'week' support entirely
     switch (timeFilter) {
-      case "week":
-        endDate = now;
-        startDate = subDays(now, 7);
-        periodType = "day";
-        break;
       case "year":
         startDate = startOfYear(now);
         endDate = endOfYear(now);
@@ -146,18 +142,10 @@ export default function Dashboard() {
     }
     
     setCategoryData(categoryChartData);
-    
+
+    // Remove week, only month and year for time labeling
     const generateTimeLabels = () => {
-      if (timeFilter === "week") {
-        return Array.from({ length: 7 }).map((_, i) => {
-          const date = subDays(endDate, 6 - i);
-          return {
-            date: date,
-            displayName: format(date, "EEE"),
-            dateKey: format(date, "yyyy-MM-dd")
-          };
-        });
-      } else if (timeFilter === "year") {
+      if (timeFilter === "year") {
         return Array.from({ length: 12 }).map((_, i) => {
           const date = new Date(now.getFullYear(), i, 1);
           return {
@@ -239,20 +227,13 @@ export default function Dashboard() {
   useEffect(() => {
     loadData();
   }, [user, timeFilter]);
-
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <div className="flex items-center space-x-2">
-          <Button 
-            variant={timeFilter === "week" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setTimeFilter("week")}
-            className={timeFilter === "week" ? "bg-primary" : "bg-[#2D2D2D] border-[#3A3A3A]"}
-          >
-            <CalendarRange className="mr-1 h-4 w-4" /> Last Week
-          </Button>
+          {/* Remove "Last Week" button entirely */}
           <Button 
             variant={timeFilter === "month" ? "default" : "outline"} 
             size="sm"
@@ -273,29 +254,30 @@ export default function Dashboard() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Update period label display */}
         <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg transform transition-transform hover:scale-105">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-300">
-              {timeFilter === "week" ? "Last Week" : timeFilter === "year" ? "This Year" : "This Month"}
+              {timeFilter === "year" ? "This Year" : "This Month"}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{formatCurrency(monthlyTotal)}</div>
+            <div className="text-2xl font-bold text-white drop-shadow-lg" style={{textShadow: '1.5px 1.5px 3px #000, 0 0 8px #0007'}}>
+              {formatCurrency(monthlyTotal)}
+            </div>
             <p className="text-xs text-gray-400 mt-1">
-              {timeFilter === "week" 
-                ? `Week of ${format(new Date(), "MMMM d")}`
-                : timeFilter === "year" 
-                  ? format(new Date(), "yyyy") 
-                  : format(new Date(), "MMMM yyyy")}
+              {timeFilter === "year" 
+                ? format(new Date(), "yyyy")
+                : format(new Date(), "MMMM yyyy")}
             </p>
             <div className="flex items-center justify-between mt-2 text-xs">
               <div className="flex flex-col">
                 <span className="text-gray-400">Personal</span>
-                <span className="text-white font-semibold">{formatCurrency(monthlyTotal - totalGroupExpenses)}</span>
+                <span className="text-white font-semibold drop-shadow" style={{textShadow: "0 0 6px #111,0 0 2px #0008"}}>{formatCurrency(monthlyTotal - totalGroupExpenses)}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-gray-400">Group</span>
-                <span className="text-white font-semibold">{formatCurrency(totalGroupExpenses)}</span>
+                <span className="text-white font-semibold drop-shadow" style={{textShadow: "0 0 6px #111,0 0 2px #0008"}}>{formatCurrency(totalGroupExpenses)}</span>
               </div>
             </div>
           </CardContent>
@@ -308,7 +290,9 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{categoryData.length}</div>
+            <div className="text-2xl font-bold text-white drop-shadow-lg" style={{textShadow: '1.5px 1.5px 3px #000,0 0 8px #0007'}}>
+              {categoryData.length}
+            </div>
             <p className="text-xs text-gray-400 mt-1">
               Active Categories
             </p>
@@ -373,13 +357,23 @@ export default function Dashboard() {
                     paddingAngle={5}
                     fill="#8884d8"
                     dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    // Update label style for higher visibility
+                    label={({ name, percent }) => (
+                      <tspan style={{
+                        fill: "#FFF",
+                        fontWeight: 700,
+                        fontSize: 15,
+                        textShadow: "1px 1.5px 6px #000"
+                      }}>
+                        {name} {(percent * 100).toFixed(0)}%
+                      </tspan>
+                    )}
                     className="drop-shadow-xl"
                   >
                     {categoryData.map((entry, index) => (
                       <Cell 
                         key={`cell-${index}`} 
-                        fill={entry.color} 
+                        fill={entry.color}
                         style={{ 
                           filter: 'drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5))',
                           stroke: '#1A1A1A',
@@ -388,19 +382,41 @@ export default function Dashboard() {
                       />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    formatter={(value) => formatCurrency(value as number)} 
-                    contentStyle={{ 
-                      backgroundColor: '#2D2D2D', 
+                  <Tooltip
+                    formatter={(value) => formatCurrency(value as number)}
+                    contentStyle={{
+                      backgroundColor: '#2D2D2D',
                       borderColor: '#3A3A3A',
                       borderRadius: '8px',
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)'
                     }}
+                    labelStyle={{
+                      color: "#FFF",
+                      fontWeight: 700,
+                      fontSize: 15,
+                      textShadow: "1px 1px 6px #000"
+                    }}
+                    itemStyle={{
+                      color: "#FFF",
+                      fontWeight: 600,
+                      fontSize: 14,
+                      textShadow: "1px 1px 6px #000"
+                    }}
                   />
-                  <Legend 
-                    formatter={(value) => <span className="text-sm font-medium">{value}</span>}
+                  <Legend
+                    formatter={(value) => (
+                      <span
+                        style={{
+                          color: "#FFF",
+                          fontWeight: 700,
+                          fontSize: 15,
+                          textShadow: "1px 2px 7px #000"
+                        }}>
+                        {value}
+                      </span>
+                    )}
                     layout="horizontal"
-                    verticalAlign="bottom" 
+                    verticalAlign="bottom"
                     align="center"
                     wrapperStyle={{
                       paddingTop: "20px"
@@ -420,7 +436,7 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="text-white flex items-center text-lg font-bold">
               <ChartBar className="h-5 w-5 mr-2" /> 
-              {timeFilter === "week" ? "Daily" : timeFilter === "year" ? "Monthly" : "Daily"} Expenses
+              {timeFilter === "year" ? "Monthly" : "Daily"} Expenses
             </CardTitle>
           </CardHeader>
           <CardContent className="h-80">
@@ -436,6 +452,18 @@ export default function Dashboard() {
                       borderColor: '#3A3A3A',
                       borderRadius: '8px',
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)'
+                    }}
+                    labelStyle={{
+                      color: "#FFF",
+                      fontWeight: 800,
+                      fontSize: 15,
+                      textShadow: "1px 1px 7px #000"
+                    }}
+                    itemStyle={{
+                      color: "#FFF",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      textShadow: "1px 1.5px 7px #000"
                     }}
                   />
                   <Bar 

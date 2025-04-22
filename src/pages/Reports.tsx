@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -270,7 +269,7 @@ export default function Reports() {
           <SelectTrigger className="w-[180px] bg-[#2D2D2D] border-[#3A3A3A] text-white">
             <SelectValue placeholder="Select timeframe" />
           </SelectTrigger>
-          <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A] text-white">
+          <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A] text-white z-50">
             <SelectItem value="week">Last Week</SelectItem>
             <SelectItem value="month">This Month</SelectItem>
             <SelectItem value="year">This Year</SelectItem>
@@ -286,7 +285,9 @@ export default function Reports() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{formatIndianCurrency(total)}</div>
+            <div className="text-2xl font-bold text-white drop-shadow-lg" style={{textShadow: "1.5px 2px 7px #000"}}>
+              {formatIndianCurrency(total)}
+            </div>
             <p className="text-xs text-gray-400 mt-1">
               {timeframe === "week"
                 ? "Last 7 days"
@@ -304,7 +305,9 @@ export default function Reports() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{categoryData.length}</div>
+            <div className="text-2xl font-bold text-white drop-shadow-lg" style={{textShadow: "1.5px 2px 7px #000"}}>
+              {categoryData.length}
+            </div>
             <p className="text-xs text-gray-400 mt-1">
               With activity in this period
             </p>
@@ -318,7 +321,7 @@ export default function Reports() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold text-white drop-shadow-lg" style={{textShadow: "1.5px 2px 7px #000"}}>
               {formatIndianCurrency(
                 timeframe === "week"
                   ? total / 7
@@ -348,6 +351,9 @@ export default function Reports() {
                       <stop offset="10%" stopColor="#9b87f5" />
                       <stop offset="80%" stopColor="#221F26" />
                     </linearGradient>
+                    <filter id="text-shadow" x="-100%" y="-100%" width="300%" height="300%">
+                      <feDropShadow dx="1.5" dy="2" stdDeviation="2" floodColor="#000" floodOpacity="0.8"/>
+                    </filter>
                   </defs>
                   <Pie
                     data={categoryData}
@@ -358,10 +364,20 @@ export default function Reports() {
                     innerRadius={40}
                     stroke="#2D2D2D"
                     dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    style={{
-                      filter: "drop-shadow(0px 6px 13px #19192177)",
-                    }}
+                    label={({ name, percent }) => (
+                      <tspan style={{
+                        fill: "#FFF",
+                        fontWeight: 800,
+                        fontSize: 16,
+                        filter: "url(#text-shadow)",
+                        paintOrder: "stroke",
+                        stroke: "#000",
+                        strokeWidth: "2"
+                      }}>
+                        {name} {(percent * 100).toFixed(0)}%
+                      </tspan>
+                    )}
+                    style={{filter: "drop-shadow(0 6px 13px #19192177)"}}
                     {...pie3DGradient}
                   >
                     {categoryData.map((entry, index) => (
@@ -378,10 +394,38 @@ export default function Reports() {
                   </Pie>
                   <Tooltip 
                     formatter={(value) => formatIndianCurrency(value as number)} 
-                    contentStyle={{ background: "#2D2D2D", borderColor: "#9b87f5", borderRadius: 12, boxShadow: "0 10px 30px #19192188" }}
+                    contentStyle={{
+                      background: "#2D2D2D",
+                      borderColor: "#9b87f5",
+                      borderRadius: 12,
+                      boxShadow: "0 10px 30px #19192188"
+                    }}
+                    labelStyle={{
+                      color: "#FFF",
+                      fontWeight: 700,
+                      fontSize: 15,
+                      textShadow: "1px 1px 6px #000"
+                    }}
+                    itemStyle={{
+                      color: "#FFF",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      textShadow: "1px 1px 7px #000"
+                    }}
                   />
                   <Legend 
-                    wrapperStyle={{ paddingTop: 18, color: "#FFF" }} 
+                    wrapperStyle={{ paddingTop: 18, color: "#FFF" }}
+                    formatter={(value) => (
+                      <span
+                        style={{
+                          color: "#FFF",
+                          fontWeight: 700,
+                          fontSize: 15,
+                          textShadow: "1px 2px 7px #000"
+                        }}>
+                        {value}
+                      </span>
+                    )}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -412,7 +456,27 @@ export default function Reports() {
                   <CartesianGrid strokeDasharray="0 6" stroke="#3A3A3A" opacity={0.25} />
                   <XAxis dataKey="date" stroke="#E0E0E0" />
                   <YAxis stroke="#E0E0E0" />
-                  <Tooltip formatter={(value) => formatIndianCurrency(value as number)} />
+                  <Tooltip 
+                    formatter={(value) => formatIndianCurrency(value as number)}
+                    contentStyle={{
+                      background: "#2D2D2D",
+                      borderColor: "#9b87f5",
+                      borderRadius: 12,
+                      boxShadow: "0 10px 30px #19192188"
+                    }}
+                    labelStyle={{
+                      color: "#FFF",
+                      fontWeight: 700,
+                      fontSize: 15,
+                      textShadow: "1.5px 2px 7px #000"
+                    }}
+                    itemStyle={{
+                      color: "#FFF",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      textShadow: "1px 2px 7px #000"
+                    }}
+                  />
                   <Bar 
                     dataKey="amount" 
                     radius={[12, 12, 2, 2]}
@@ -447,9 +511,17 @@ export default function Reports() {
                         className="w-4 h-4 rounded-full mr-2"
                         style={{ backgroundColor: category.color }}
                       />
-                      <span className="text-white font-bold drop-shadow">{category.name}</span>
+                      <span className="text-white font-bold drop-shadow" style={{
+                        textShadow: "1.5px 2px 7px #000",
+                        fontSize: "1.1rem"
+                      }}>{category.name}</span>
                     </div>
-                    <span className="font-semibold text-white drop-shadow">{formatIndianCurrency(category.value)}</span>
+                    <span className="font-semibold text-white drop-shadow" style={{
+                      textShadow: "1.5px 2px 8px #000",
+                      fontSize: "1.1rem"
+                    }}>
+                      {formatIndianCurrency(category.value)}
+                    </span>
                   </div>
                   <div className="h-2 bg-[#3A3A3A] rounded-full">
                     <div
@@ -461,7 +533,9 @@ export default function Reports() {
                       }}
                     />
                   </div>
-                  <div className="text-xs text-gray-400 text-right">
+                  <div className="text-xs text-gray-400 text-right" style={{
+                    textShadow: "1.5px 2px 7px #000"
+                  }}>
                     {((category.value / total) * 100).toFixed(1)}% of total
                   </div>
                 </div>
