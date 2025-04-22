@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -10,7 +9,6 @@ import {
   Tags,
   Users,
   User,
-  Settings,
   ChevronRight,
   ChevronLeft,
   LogOut
@@ -53,12 +51,7 @@ export function Sidebar() {
       name: "Profile",
       href: "/profile",
       icon: User,
-    },
-    {
-      name: "Settings",
-      href: "/settings",
-      icon: Settings,
-    },
+    }
   ];
 
   return (

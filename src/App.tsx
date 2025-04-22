@@ -84,13 +84,14 @@ const App = () => (
                 </MainLayout>
               </PrivateRoute>
             } />
-            <Route path="/settings" element={
+            {/* Removed Settings Route */}
+            {/* <Route path="/settings" element={
               <PrivateRoute>
                 <MainLayout>
                   <Settings />
                 </MainLayout>
               </PrivateRoute>
-            } />
+            } /> */}
             {/* Add Groups routes */}
             <Route path="/groups" element={
               <PrivateRoute>
