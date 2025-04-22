@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/use-toast";
 import { User } from "@/lib/auth";
 import { formatIndianCurrency } from "@/lib/utils";
@@ -348,65 +347,88 @@ export function getGroupExpenses(groupId: string): SharedExpense[] {
   }
 }
 
-// Calculate balances between group members with corrected logic
+// Calculate balances between group members with fixed distribution logic
 export function calculateBalances(groupId: string): Balance[] {
   const expenses = getGroupExpenses(groupId);
   const group = getGroup(groupId);
   
   if (!group) return [];
   
-  // For each user, track how much they've paid and how much they owe
-  const netBalances: Record<string, number> = {};
+  // Track what each person has paid and what they owe
+  const balanceSheet: Record<string, Record<string, number>> = {};
   
-  // Initialize net balances for all members
+  // Initialize balance sheet for all members
   group.members.forEach(member => {
-    netBalances[member.userId] = 0;
-  });
-  
-  // Calculate net balances from all expenses
-  expenses.forEach(expense => {
-    if (expense.settled) return;
-    
-    // Add the full amount to the payer (they paid it all initially)
-    netBalances[expense.paidBy] += expense.amount;
-    
-    // Subtract each person's share (everyone owes their fair share)
-    expense.splits.forEach(split => {
-      netBalances[split.userId] -= split.amount;
+    balanceSheet[member.userId] = {};
+    // Initialize balances with other members to 0
+    group.members.forEach(otherMember => {
+      if (member.userId !== otherMember.userId) {
+        balanceSheet[member.userId][otherMember.userId] = 0;
+      }
     });
   });
   
-  // Convert net balances to pairwise balances
-  const balances: Balance[] = [];
-  const members = group.members.map(m => m.userId);
-  
-  // Create all possible pairs of members
-  for (let i = 0; i < members.length; i++) {
-    for (let j = i + 1; j < members.length; j++) {
-      const user1 = members[i];
-      const user2 = members[j];
+  // Process each expense
+  expenses.forEach(expense => {
+    if (expense.settled) return;
+    
+    const payer = expense.paidBy;
+    const totalAmount = expense.amount;
+    const memberCount = expense.splits.length;
+    const sharePerPerson = totalAmount / memberCount;
+    
+    // For each member's split
+    expense.splits.forEach(split => {
+      const memberUserId = split.userId;
       
-      // Calculate relative balance
-      const balance = netBalances[user1] - netBalances[user2];
+      // Skip if payer and member are the same
+      if (memberUserId === payer) return;
       
-      if (balance > 0) {
-        // User2 owes User1
-        balances.push({
-          userId: user2,
-          otherUserId: user1,
-          amount: Math.abs(balance),
-        });
-      } else if (balance < 0) {
-        // User1 owes User2
-        balances.push({
-          userId: user1,
-          otherUserId: user2,
-          amount: Math.abs(balance),
-        });
+      // Member owes their share to the payer
+      if (balanceSheet[memberUserId][payer] !== undefined) {
+        // Increase what this member owes to the payer
+        balanceSheet[memberUserId][payer] += sharePerPerson;
+        // Decrease what the payer owes to this member (or increase debt in opposite direction)
+        balanceSheet[payer][memberUserId] -= sharePerPerson;
       }
-      // If balance is 0, no debt exists
-    }
-  }
+    });
+  });
+  
+  // Convert to the Balance array format, simplifying the balances
+  const balances: Balance[] = [];
+  
+  // Process each pair once
+  const processed = new Set<string>();
+  
+  Object.keys(balanceSheet).forEach(userId => {
+    Object.keys(balanceSheet[userId]).forEach(otherUserId => {
+      const pairKey = [userId, otherUserId].sort().join('-');
+      if (processed.has(pairKey)) return;
+      processed.add(pairKey);
+      
+      // Calculate net amount between the two users
+      const amount = balanceSheet[userId][otherUserId];
+      
+      // Only add non-zero balances
+      if (Math.abs(amount) > 0.01) { // Small threshold to handle floating point issues
+        if (amount > 0) {
+          // userId owes otherUserId
+          balances.push({
+            userId: userId,
+            otherUserId: otherUserId,
+            amount: amount
+          });
+        } else if (amount < 0) {
+          // otherUserId owes userId
+          balances.push({
+            userId: otherUserId,
+            otherUserId: userId,
+            amount: Math.abs(amount)
+          });
+        }
+      }
+    });
+  });
   
   return balances;
 }
