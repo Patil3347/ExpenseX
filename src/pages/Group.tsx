@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -77,7 +76,6 @@ import {
   formatCurrency
 } from "@/lib/groups";
 
-// Form schema for adding an expense
 const expenseFormSchema = z.object({
   description: z.string().min(1, "Description is required"),
   amount: z.string().refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
@@ -89,7 +87,6 @@ const expenseFormSchema = z.object({
   paidBy: z.string({ required_error: "Please select who paid" }),
 });
 
-// Form schema for adding a member
 const memberFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
@@ -151,7 +148,6 @@ export default function GroupDetails() {
         return;
       }
       
-      // Check if user is member of this group
       if (!groupData.members.some(m => m.userId === user.id)) {
         toast({
           variant: "destructive",
@@ -229,8 +225,6 @@ export default function GroupDetails() {
     if (!groupId) return;
 
     try {
-      // Generate a mock user ID for demo purposes
-      // In a real app, this would be a real user lookup
       const mockUserId = `user-${Date.now()}`;
       
       const newMember: GroupMember = {
@@ -292,10 +286,8 @@ export default function GroupDetails() {
     return member ? member.displayName : "Unknown";
   };
 
-  // Calculate total expenses for the group
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   
-  // Filter expenses
   const activeExpenses = expenses.filter(expense => !expense.settled);
   const settledExpenses = expenses.filter(expense => expense.settled);
 
@@ -396,19 +388,30 @@ export default function GroupDetails() {
                 {balances.length > 0 ? (
                   <div className="space-y-3">
                     {balances.map((balance, index) => (
-                      <div key={index} className="flex justify-between items-center p-3 border border-[#3A3A3A] rounded-md">
+                      <div 
+                        key={index} 
+                        className="flex justify-between items-center p-3 border border-[#3A3A3A] rounded-md hover:bg-[#3A3A3A]/50 transition-colors"
+                      >
                         <div className="flex items-center">
-                          <DollarSign className="h-4 w-4 mr-2 text-primary" />
-                          <span>{getMemberName(balance.userId)}</span>
+                          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                            {getMemberName(balance.userId).charAt(0).toUpperCase()}
+                          </div>
+                          <span className="font-medium">{getMemberName(balance.userId)}</span>
                           <span className="mx-2 text-gray-400">owes</span>
-                          <span>{getMemberName(balance.otherUserId)}</span>
+                          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                            {getMemberName(balance.otherUserId).charAt(0).toUpperCase()}
+                          </div>
+                          <span className="font-medium">{getMemberName(balance.otherUserId)}</span>
                         </div>
-                        <span className="font-medium">{formatCurrency(balance.amount)}</span>
+                        <span className="font-medium text-lg text-green-400">{formatCurrency(balance.amount)}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center py-6 text-gray-400">No outstanding balances</p>
+                  <div className="text-center py-6 border border-dashed border-[#3A3A3A] rounded-md">
+                    <p className="text-gray-400">No outstanding balances</p>
+                    <p className="text-xs text-gray-500 mt-1">Everyone is settled up!</p>
+                  </div>
                 )}
               </TabsContent>
               <TabsContent value="expenses" className="mt-4">
@@ -427,17 +430,24 @@ export default function GroupDetails() {
                       </TableHeader>
                       <TableBody>
                         {activeExpenses.map(expense => (
-                          <TableRow key={expense.id}>
+                          <TableRow key={expense.id} className="hover:bg-[#3A3A3A]/50">
                             <TableCell className="font-medium">{expense.description}</TableCell>
-                            <TableCell>{getMemberName(expense.paidBy)}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                                  {getMemberName(expense.paidBy).charAt(0).toUpperCase()}
+                                </div>
+                                <span>{getMemberName(expense.paidBy)}</span>
+                              </div>
+                            </TableCell>
                             <TableCell>{format(new Date(expense.date), "MMM dd, yyyy")}</TableCell>
-                            <TableCell className="text-right">{formatCurrency(expense.amount)}</TableCell>
+                            <TableCell className="text-right font-semibold">{formatCurrency(expense.amount)}</TableCell>
                             <TableCell>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleSettleExpense(expense.id)}
-                                className="h-8 w-8 text-gray-400 hover:text-green-500"
+                                className="h-8 w-8 text-gray-400 hover:bg-green-500/20 hover:text-green-500 transition-colors"
                               >
                                 <Check className="h-4 w-4" />
                               </Button>
@@ -482,7 +492,6 @@ export default function GroupDetails() {
         </Card>
       </div>
 
-      {/* Add Expense Dialog */}
       <Dialog open={isExpenseDialogOpen} onOpenChange={setIsExpenseDialogOpen}>
         <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] text-white">
           <DialogHeader>
@@ -594,7 +603,6 @@ export default function GroupDetails() {
         </DialogContent>
       </Dialog>
 
-      {/* Add Member Dialog */}
       <Dialog open={isMemberDialogOpen} onOpenChange={setIsMemberDialogOpen}>
         <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] text-white">
           <DialogHeader>

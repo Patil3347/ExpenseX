@@ -1,6 +1,6 @@
-
 import { toast } from "@/components/ui/use-toast";
 import { User } from "@/lib/auth";
+import { formatIndianCurrency } from "@/lib/utils";
 
 export interface GroupMember {
   userId: string;
@@ -439,10 +439,7 @@ export function settleExpense(expenseId: string): SharedExpense | undefined {
   }
 }
 
-// Format currency (reused from expenses.ts)
+// Format currency (updated to use Indian Rupee format)
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount);
+  return formatIndianCurrency(amount);
 }

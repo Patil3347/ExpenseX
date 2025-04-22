@@ -1,5 +1,5 @@
-
 import { toast } from "@/components/ui/use-toast";
+import { formatIndianCurrency } from "@/utils";
 
 // Types
 export interface Expense {
@@ -358,8 +358,5 @@ export function getCurrentMonthTotal(userId: string): number {
 }
 
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount);
+  return formatIndianCurrency(amount);
 }

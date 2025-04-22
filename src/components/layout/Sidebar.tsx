@@ -39,14 +39,15 @@ export function Sidebar() {
       icon: Tags,
     },
     {
-      name: "Reports",
-      href: "/reports",
-      icon: PieChart,
-    },
-    {
       name: "Groups",
       href: "/groups",
       icon: Users,
+      isHighlighted: true,
+    },
+    {
+      name: "Reports",
+      href: "/reports",
+      icon: PieChart,
     },
     {
       name: "Profile",
@@ -89,11 +90,16 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
                 pathname === item.href 
-                  ? "bg-primary text-white" 
-                  : "text-gray-300 hover:bg-[#3A3A3A] hover:text-white"
+                  ? "bg-primary text-white font-medium shadow-md shadow-primary/30" 
+                  : item.isHighlighted
+                    ? "text-white hover:bg-primary/20 hover:text-white border-l-2 border-primary"
+                    : "text-gray-300 hover:bg-[#3A3A3A] hover:text-white"
               )}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className={cn(
+                "h-5 w-5",
+                item.isHighlighted && pathname !== item.href ? "text-primary" : ""
+              )} />
               {!collapsed && <span>{item.name}</span>}
             </Link>
           ))}
