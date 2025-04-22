@@ -38,16 +38,16 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-[#1A1A1A]">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-expense-primary">ExpenseX</h1>
-          <p className="text-gray-600 mt-2">Smart expense management</p>
+          <h1 className="text-3xl font-bold text-primary">ExpenseX</h1>
+          <p className="text-gray-400 mt-2">Smart expense management</p>
         </div>
         
-        <Card>
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A]">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center text-white">Sign In</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -57,11 +57,15 @@ export default function Login() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel className="text-gray-300">Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="you@example.com" {...field} />
+                        <Input 
+                          placeholder="you@example.com" 
+                          {...field} 
+                          className="bg-[#1A1A1A] border-[#3A3A3A] text-white focus:ring-primary"
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
                 />
@@ -70,17 +74,22 @@ export default function Login() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel className="text-gray-300">Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
+                        <Input 
+                          type="password" 
+                          placeholder="••••••••" 
+                          {...field}
+                          className="bg-[#1A1A1A] border-[#3A3A3A] text-white focus:ring-primary" 
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
                 />
                 <Button 
                   type="submit" 
-                  className="w-full bg-expense-primary hover:bg-expense-light"
+                  className="w-full bg-primary hover:bg-primary/90 transition-colors duration-300"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Signing in..." : "Sign In"}
@@ -89,9 +98,9 @@ export default function Login() {
             </Form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
-            <div className="text-center text-sm">
+            <div className="text-center text-sm text-gray-400">
               Don't have an account?{" "}
-              <Link to="/register" className="text-expense-primary hover:underline font-medium">
+              <Link to="/register" className="text-primary hover:text-primary/90 font-medium transition-colors duration-300">
                 Create one
               </Link>
             </div>

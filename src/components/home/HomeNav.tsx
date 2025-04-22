@@ -56,22 +56,28 @@ export const HomeNav = ({ onGetStarted }: HomeNavProps) => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center justify-center flex-1">
             <div className="flex space-x-8">
-              <Link to="/" className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10">
+              <Link 
+                to="/" 
+                className="text-gray-300 hover:text-primary px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10"
+              >
                 Home
               </Link>
               <button 
                 onClick={() => scrollToSection('features')}
-                className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10"
+                className="text-gray-300 hover:text-primary px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10"
               >
                 Features
               </button>
               <button 
                 onClick={() => scrollToSection('articles')}
-                className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10"
+                className="text-gray-300 hover:text-primary px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10"
               >
                 Articles
               </button>
-              <Link to="/about" className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10">
+              <Link 
+                to="/about" 
+                className="text-gray-300 hover:text-primary px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-white/10"
+              >
                 About Us
               </Link>
             </div>
@@ -104,22 +110,28 @@ export const HomeNav = ({ onGetStarted }: HomeNavProps) => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-[#1A1A1A]/95 backdrop-blur-sm pb-3 px-4">
           <div className="flex flex-col space-y-2">
-            <Link to="/" className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300">
+            <Link 
+              to="/" 
+              className="text-gray-300 hover:text-primary px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300"
+            >
               Home
             </Link>
             <button 
               onClick={() => scrollToSection('features')}
-              className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300 text-left"
+              className="text-gray-300 hover:text-primary px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300 text-left"
             >
               Features
             </button>
             <button 
               onClick={() => scrollToSection('articles')}
-              className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300 text-left"
+              className="text-gray-300 hover:text-primary px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300 text-left"
             >
               Articles
             </button>
-            <Link to="/about" className="text-gray-300 hover:text-white px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300">
+            <Link 
+              to="/about" 
+              className="text-gray-300 hover:text-primary px-4 py-2 rounded-full text-base font-medium hover:bg-white/10 transition-all duration-300"
+            >
               About Us
             </Link>
             <div className="flex flex-col space-y-2 pt-4 border-t border-gray-700/50 mt-4">

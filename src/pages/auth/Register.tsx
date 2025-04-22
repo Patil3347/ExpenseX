@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
@@ -45,16 +44,16 @@ export default function Register() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-[#1A1A1A]">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-expense-primary">ExpenseX</h1>
-          <p className="text-gray-600 mt-2">Smart expense management</p>
+          <h1 className="text-3xl font-bold text-primary">ExpenseX</h1>
+          <p className="text-gray-400 mt-2">Smart expense management</p>
         </div>
         
-        <Card>
+        <Card className="bg-[#2D2D2D] border-[#3A3A3A]">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center text-white">Create Account</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -64,11 +63,15 @@ export default function Register() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel className="text-gray-300">Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" {...field} />
+                        <Input 
+                          placeholder="John Doe" 
+                          {...field}
+                          className="bg-[#1A1A1A] border-[#3A3A3A] text-white focus:ring-primary" 
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
                 />
@@ -77,11 +80,15 @@ export default function Register() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel className="text-gray-300">Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="you@example.com" {...field} />
+                        <Input 
+                          placeholder="you@example.com" 
+                          {...field}
+                          className="bg-[#1A1A1A] border-[#3A3A3A] text-white focus:ring-primary" 
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
                 />
@@ -90,11 +97,16 @@ export default function Register() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel className="text-gray-300">Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
+                        <Input 
+                          type="password" 
+                          placeholder="••••••••" 
+                          {...field}
+                          className="bg-[#1A1A1A] border-[#3A3A3A] text-white focus:ring-primary" 
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
                 />
@@ -103,17 +115,22 @@ export default function Register() {
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
+                      <FormLabel className="text-gray-300">Confirm Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
+                        <Input 
+                          type="password" 
+                          placeholder="••••••••" 
+                          {...field}
+                          className="bg-[#1A1A1A] border-[#3A3A3A] text-white focus:ring-primary" 
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
                 />
                 <Button 
                   type="submit" 
-                  className="w-full bg-expense-primary hover:bg-expense-light"
+                  className="w-full bg-primary hover:bg-primary/90 transition-colors duration-300"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Creating account..." : "Create Account"}
@@ -122,9 +139,9 @@ export default function Register() {
             </Form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
-            <div className="text-center text-sm">
+            <div className="text-center text-sm text-gray-400">
               Already have an account?{" "}
-              <Link to="/login" className="text-expense-primary hover:underline font-medium">
+              <Link to="/login" className="text-primary hover:text-primary/90 font-medium transition-colors duration-300">
                 Sign in
               </Link>
             </div>
