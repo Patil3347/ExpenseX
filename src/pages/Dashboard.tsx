@@ -48,7 +48,6 @@ export default function Dashboard() {
   const loadData = () => {
     if (!user) return;
     
-    // Calculate date ranges based on time filter
     const now = new Date();
     let startDate: Date;
     let endDate: Date;
@@ -56,8 +55,8 @@ export default function Dashboard() {
     
     switch (timeFilter) {
       case "week":
-        startDate = startOfWeek(now, { weekStartsOn: 1 });
-        endDate = endOfWeek(now, { weekStartsOn: 1 });
+        endDate = now;
+        startDate = subDays(now, 7);
         periodType = "day";
         break;
       case "year":
@@ -72,14 +71,11 @@ export default function Dashboard() {
         periodType = "day";
     }
     
-    // Get user groups
     const groups = getUserGroups(user.id);
     setUserGroups(groups);
     
-    // Get personal expenses
     let personalExpenses = getExpensesByPeriod(user.id, periodType);
     
-    // Filter personal expenses based on timeframe
     const filteredPersonalExpenses = getCurrentMonthExpenses(user.id).filter(exp => {
       const expDate = new Date(exp.date);
       return isWithinInterval(expDate, { start: startDate, end: endDate });
@@ -87,7 +83,6 @@ export default function Dashboard() {
     
     let personalTotal = filteredPersonalExpenses.reduce((total, expense) => total + expense.amount, 0);
     
-    // Get group expenses and calculate user's share
     let groupExpensesTotal = 0;
     let allGroupExpenses: SharedExpense[] = [];
     let filteredGroupExpenses: SharedExpense[] = [];
@@ -96,7 +91,6 @@ export default function Dashboard() {
       const groupExpenses = getGroupExpenses(group.id);
       allGroupExpenses = [...allGroupExpenses, ...groupExpenses];
       
-      // Filter group expenses based on timeframe
       const filteredExpenses = groupExpenses.filter(exp => {
         const expDate = new Date(exp.date);
         return isWithinInterval(expDate, { start: startDate, end: endDate });
@@ -104,7 +98,6 @@ export default function Dashboard() {
       
       filteredGroupExpenses = [...filteredGroupExpenses, ...filteredExpenses];
       
-      // Calculate user's share in each expense
       filteredExpenses.forEach(expense => {
         const userSplit = expense.splits.find(split => split.userId === user.id);
         if (userSplit) {
@@ -115,30 +108,24 @@ export default function Dashboard() {
     
     setTotalGroupExpenses(groupExpensesTotal);
     
-    // Calculate combined total (personal + group)
     const combinedTotal = personalTotal + groupExpensesTotal;
     setMonthlyTotal(combinedTotal);
     setTotalExpenses(combinedTotal);
     
-    // Sort group expenses by date (newest first) and take the first 5
     const sortedGroupExpenses = filteredGroupExpenses
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
     setRecentGroupExpenses(sortedGroupExpenses);
     
-    // Sort and limit personal expenses to most recent 5
     setRecentExpenses(filteredPersonalExpenses
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5)
     );
     
-    // Get categories
     const categories = getCategories(user.id);
     
-    // Get category data for pie chart (personal expenses)
     const categoryTotals = getCategoryTotals(user.id, timeFilter);
     
-    // Create chart data with combined personal and group expenses
     const categoryChartData = Object.entries(categoryTotals)
       .filter(([_, value]) => value > 0)
       .map(([categoryId, value]) => {
@@ -150,21 +137,18 @@ export default function Dashboard() {
         };
       });
     
-    // Add group expenses to chart data (under "Group Expenses" category)
     if (groupExpensesTotal > 0) {
       categoryChartData.push({
         name: "Group Expenses",
         value: groupExpensesTotal,
-        color: "#9b87f5", // Use a distinctive color for group expenses
+        color: "#9b87f5",
       });
     }
     
     setCategoryData(categoryChartData);
     
-    // Prepare data for expense history chart
     const generateTimeLabels = () => {
       if (timeFilter === "week") {
-        // For week view, get last 7 days
         return Array.from({ length: 7 }).map((_, i) => {
           const date = subDays(endDate, 6 - i);
           return {
@@ -174,7 +158,6 @@ export default function Dashboard() {
           };
         });
       } else if (timeFilter === "year") {
-        // For year view, show all months
         return Array.from({ length: 12 }).map((_, i) => {
           const date = new Date(now.getFullYear(), i, 1);
           return {
@@ -184,7 +167,6 @@ export default function Dashboard() {
           };
         });
       } else {
-        // For month view, show days of the month
         const daysInMonth = endOfMonth(now).getDate();
         return Array.from({ length: daysInMonth }).map((_, i) => {
           const date = new Date(now.getFullYear(), now.getMonth(), i + 1);
@@ -197,9 +179,7 @@ export default function Dashboard() {
       }
     };
     
-    // Get expense history by period
     const getExpenseHistoryData = () => {
-      // Format personal expenses
       const personalExpensesByDate: Record<string, number> = {};
       filteredPersonalExpenses.forEach(expense => {
         const expDate = new Date(expense.date);
@@ -217,7 +197,6 @@ export default function Dashboard() {
         personalExpensesByDate[dateKey] += expense.amount;
       });
       
-      // Format group expenses
       const groupExpensesByDate: Record<string, number> = {};
       filteredGroupExpenses.forEach(expense => {
         const expDate = new Date(expense.date);
@@ -237,20 +216,16 @@ export default function Dashboard() {
         groupExpensesByDate[dateKey] += userShare;
       });
       
-      // Combine personal and group expenses
       const combinedExpenses: Record<string, number> = {};
       
-      // Add personal expenses
       Object.entries(personalExpensesByDate).forEach(([date, amount]) => {
         combinedExpenses[date] = (combinedExpenses[date] || 0) + amount;
       });
       
-      // Add group expenses
       Object.entries(groupExpensesByDate).forEach(([date, amount]) => {
         combinedExpenses[date] = (combinedExpenses[date] || 0) + amount;
       });
       
-      // Generate formatted data for chart
       const timeLabels = generateTimeLabels();
       return timeLabels.map(({ displayName, dateKey }) => ({
         name: displayName,
@@ -276,7 +251,7 @@ export default function Dashboard() {
             onClick={() => setTimeFilter("week")}
             className={timeFilter === "week" ? "bg-primary" : "bg-[#2D2D2D] border-[#3A3A3A]"}
           >
-            <CalendarRange className="mr-1 h-4 w-4" /> This Week
+            <CalendarRange className="mr-1 h-4 w-4" /> Last Week
           </Button>
           <Button 
             variant={timeFilter === "month" ? "default" : "outline"} 
@@ -301,7 +276,7 @@ export default function Dashboard() {
         <Card className="bg-[#2D2D2D] border-[#3A3A3A] shadow-lg transform transition-transform hover:scale-105">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-300">
-              {timeFilter === "week" ? "This Week" : timeFilter === "year" ? "This Year" : "This Month"}
+              {timeFilter === "week" ? "Last Week" : timeFilter === "year" ? "This Year" : "This Month"}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -489,7 +464,6 @@ export default function Dashboard() {
         <CardContent>
           {recentExpenses.length > 0 || recentGroupExpenses.length > 0 ? (
             <div className="space-y-4">
-              {/* Personal Expenses */}
               {recentExpenses.map((expense) => (
                 <div 
                   key={expense.id} 
@@ -505,7 +479,6 @@ export default function Dashboard() {
                 </div>
               ))}
               
-              {/* Group Expenses */}
               {recentGroupExpenses.map((expense) => {
                 const userShare = expense.splits.find(split => split.userId === user?.id)?.amount || 0;
                 return (
