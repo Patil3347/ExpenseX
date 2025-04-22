@@ -1,5 +1,5 @@
 import { toast } from "@/components/ui/use-toast";
-import { formatIndianCurrency } from "@/utils";
+import { formatIndianCurrency } from "@/lib/utils";
 
 // Types
 export interface Expense {
